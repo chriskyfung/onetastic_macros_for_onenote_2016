@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-06-15 -->
+<Macro id="M7C363AC2E3E74D3FB821281B5D1D9613" name="Resize Images+" category="Image" description="Resizes each image and printout in the current page by given percentage. This extension allows to choose either all images or the selected image only on the current page to be resized." version="7">
+  <ModifyVar name="Message" op="set">
+    <Prompt type="message">Enter the size of the image as a percentage of the original size (e.g. Enter 50 for 50%)</Prompt>
+  </ModifyVar>
+  <ModifyVar name="WidthRatio" op="set">
+    <Prompt type="text" initialValue="50">&amp;Width</Prompt>
+  </ModifyVar>
+  <ModifyVar name="HeightRatio" op="set">
+    <Prompt type="text" initialValue="50">&amp;Height</Prompt>
+  </ModifyVar>
+  <ModifyVar name="IsSelectedOnly" op="set">
+    <Prompt type="checkbox" initialValue="" values="">Selected Image Only</Prompt>
+  </ModifyVar>
+  <ModifyVar name="InputsValid" op="set" value="true" />
+  <For first="Page" collapsed="true">
+    <IfVar name="WidthRatio" op="lte" value="0">
+      <ModifyVar name="InputsValid" op="set" value="false" />
+    </IfVar>
+    <IfVar name="HeightRatio" op="lte" value="0">
+      <ModifyVar name="InputsValid" op="set" value="false" />
+    </IfVar>
+    <IfVar name="InputsValid" op="eq" value="false">
+      <ModifyVar name="Message" op="set">
+        <Prompt type="message">Width and height ratio must be positive numbers.</Prompt>
+      </ModifyVar>
+    </IfVar>
+  </For>
+  <For first="Image">
+    <That hasProp="isPrintOut" op="eq" value="true" />
+    <Under directly="true" a="Page" />
+    <ModifyVar name="Top" op="set" prop="y" />
+  </For>
+  <IfVar name="IsSelectedOnly" op="eq" value="true">
+    <IsRootOp />
+    <For each="Image">
+      <That hasProp="selection" op="not" value="none" />
+      <Under directly="true" a="Page" />
+      <IfVar name="InputsValid" op="eq" value="true">
+        <IfProp name="isPrintOut" op="eq" value="true">
+          <ModifyProp name="y" op="set" var="Top" />
+        </IfProp>
+        <ModifyProp name="width" op="perc" var="WidthRatio" />
+        <ModifyProp name="height" op="perc" var="HeightRatio" />
+        <IfProp name="isPrintOut" op="eq" value="true">
+          <ModifyVar name="Top" op="add" prop="height" />
+          <ModifyVar name="Top" op="add" value="5" />
+        </IfProp>
+      </IfVar>
+    </For>
+    <For each="Image">
+      <That hasProp="selection" op="not" value="none" />
+      <Under a="Outline" />
+      <IfVar name="InputsValid" op="eq" value="true">
+        <ModifyProp name="width" op="perc" var="WidthRatio" />
+        <ModifyProp name="height" op="perc" var="HeightRatio" />
+      </IfVar>
+    </For>
+    <Else>
+      <IsRootOp />
+      <For each="Image">
+        <Under directly="true" a="Page" />
+        <IfVar name="InputsValid" op="eq" value="true">
+          <IfProp name="isPrintOut" op="eq" value="true">
+            <ModifyProp name="y" op="set" var="Top" />
+          </IfProp>
+          <ModifyProp name="width" op="perc" var="WidthRatio" />
+          <ModifyProp name="height" op="perc" var="HeightRatio" />
+          <IfProp name="isPrintOut" op="eq" value="true">
+            <ModifyVar name="Top" op="add" prop="height" />
+            <ModifyVar name="Top" op="add" value="5" />
+          </IfProp>
+        </IfVar>
+      </For>
+      <For each="Image">
+        <Under a="Outline" />
+        <IfVar name="InputsValid" op="eq" value="true">
+          <ModifyProp name="width" op="perc" var="WidthRatio" />
+          <ModifyProp name="height" op="perc" var="HeightRatio" />
+        </IfVar>
+      </For>
+    </Else>
+  </IfVar>
+</Macro>
