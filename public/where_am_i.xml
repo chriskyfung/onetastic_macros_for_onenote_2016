@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-05-09 -->
+<Macro id="M095D63DEFCDD432BAB59161BCB0F2710" name="Where am I +" category="Outlining" description="Inserts a breadcrumb showing where the current page is in the hieararchy of notebooks / section groups / sections / Parent Pages. Automatic remove the old breadcrumb." version="6">
+  <For first="Page">
+    <That hasProp="selection" op="not" value="all" />
+    <ModifyProp name="selection" op="set" value="all" />
+  </For>
+  <For first="Paragraph">
+    <That hasProp="text" op="startsWith" value="You are here: " />
+    <That hasProp="text" op="contains" value=" > " />
+    <IfProp name="text" op="containsCI" prop="hyperlink" />
+    <ModifyProp name="text" op="set" value="" />
+  </For>
+  <For each="Notebook" in="CurrentNotebook">
+    <ModifyVar name="NotebookPath" op="set" prop="path" />
+    <ModifyVar name="NotebookName" op="set" prop="name" />
+    <ModifyVar name="NotebookHyperlink" op="set" prop="hyperlink" />
+  </For>
+  <For each="Section" in="CurrentSection" collapsed="true">
+    <ModifyVar name="SectionPath" op="set" prop="path" />
+    <ModifyVar name="SectionName" op="set" prop="name" />
+    <ModifyVar name="SectionHyperlink" op="set" prop="hyperlink" />
+  </For>
+  <ModifyVar name="NBPathLen" op="set">
+    <Function name="String_Length">
+      <Param name="string" var="NotebookPath" />
+    </Function>
+  </ModifyVar>
+  <ModifyVar name="Last" op="set" var="NBPathLen" />
+  <ModifyVar name="Last" op="sub" value="1" />
+  <ModifyVar name="Separator" op="set">
+    <Function name="String_Substring">
+      <Param name="string" var="NotebookPath" />
+      <Param name="count" value="1" />
+      <Param name="offset" var="Last" />
+    </Function>
+  </ModifyVar>
+  <IfVar name="Separator" op="not" value="/" collapsed="true">
+    <IsRootOp />
+    <IfVar name="Separator" op="not" value="">
+      <IsRootOp />
+      <ModifyVar name="SectionPathLen" op="set">
+        <Function name="String_Length">
+          <Param name="string" var="SectionPath" />
+        </Function>
+      </ModifyVar>
+      <ModifyVar name="Separator" op="set">
+        <Function name="String_Substring">
+          <Param name="string" var="SectionPath" />
+          <Param name="offset" var="NBPathLen" />
+          <Param name="count" value="1" />
+        </Function>
+      </ModifyVar>
+    </IfVar>
+  </IfVar>
+  <ModifyVar name="i" op="set" value="0" />
+  <For each="SectionGroup" in="CurrentNotebook">
+    <ModifyVar name="SGPath" op="set" prop="path" />
+    <IfVar name="SGPath" op="notEndsWith" var="Separator">
+      <ModifyVar name="SGPath" op="add" var="Separator" />
+    </IfVar>
+    <IfVar name="SectionPath" op="startsWith" var="SGPath">
+      <ModifyVar name="SGHyperlinks" op="set" prop="hyperlink">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="SGNames" op="set" prop="name">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </IfVar>
+  </For>
+  <For first="Page" in="CurrentPage">
+    <ModifyVar name="PageLevel" op="set" prop="pageLevel" />
+    <ModifyVar name="PageID" op="set" prop="id" />
+    <ModifyVar name="f" op="set" value="0" />
+    <ModifyVar name="j" op="set" value="0" />
+  </For>
+  <IfVar name="PageLevel" op="gt" value="1">
+    <IsRootOp />
+    <For each="Page" in="CurrentSection">
+      <That hasProp="pageLevel" op="lte" var="PageLevel" />
+      <ModifyVar name="PageName" op="set" prop="name" />
+      <ModifyVar name="jLevel" op="set" value="1" />
+      <ModifyVar name="jLevel" op="add" var="j" />
+      <IfVar name="f" op="eq" value="0">
+        <IfProp name="pageLevel" op="lt" var="PageLevel">
+          <IfProp name="pageLevel" op="eq" var="jLevel">
+            <ModifyVar name="ParentName" op="set" prop="name">
+              <LeftIndex var="j" />
+            </ModifyVar>
+            <ModifyVar name="ParentHyperlink" op="set" prop="hyperlink">
+              <LeftIndex var="j" />
+            </ModifyVar>
+            <Else>
+              <IfProp name="pageLevel" op="gt" var="jLevel">
+                <ModifyVar name="j" op="add" value="1" />
+                <Else>
+                  <ModifyVar name="j" op="sub" value="1" />
+                  <IsRootOp />
+                </Else>
+              </IfProp>
+              <IsRootOp />
+            </Else>
+          </IfProp>
+          <Else>
+            <IfProp name="id" op="eq" var="PageID">
+              <ModifyVar name="f" op="set" value="1" />
+              <ModifyVar name="j" op="set" value="0" />
+            </IfProp>
+            <IsRootOp />
+          </Else>
+        </IfProp>
+      </IfVar>
+    </For>
+  </IfVar>
+  <For first="Page">
+    <ModifyVar name="PageName" op="set" prop="name" />
+    <ModifyVar name="PageHyperlink" op="set" prop="hyperlink" />
+    <IfProp name="pageLevel" op="lte" value="1" />
+    <Insert type="Outline">
+      <ModifyProp name="x" op="set" value="400" />
+      <ModifyProp name="y" op="set" value="20" />
+      <ModifyProp name="selection" op="set" value="all" />
+      <Insert type="Paragraph">
+        <ModifyProp name="selection" op="set" value="all" />
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" value="You are here: " />
+          <ModifyProp name="bold" op="set" value="true" />
+        </Insert>
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" var="NotebookName" />
+          <ModifyProp name="hyperlink" op="set" var="NotebookHyperlink" />
+        </Insert>
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" value=" > " />
+        </Insert>
+        <WhileVar name="i" op="gt" value="1" collapsed="true">
+          <ModifyVar name="i" op="sub" value="1" />
+          <Insert type="Text">
+            <ModifyProp name="value" op="set" var="SGNames">
+              <RightIndex var="i" />
+            </ModifyProp>
+            <ModifyProp name="hyperlink" op="set" var="SGHyperlinks">
+              <RightIndex var="i" />
+            </ModifyProp>
+          </Insert>
+          <Insert type="Text">
+            <ModifyProp name="value" op="set" value=" > " />
+          </Insert>
+        </WhileVar>
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" var="SectionName" />
+          <ModifyProp name="hyperlink" op="set" var="SectionHyperlink" />
+        </Insert>
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" value=" > " />
+        </Insert>
+        <IfVar name="f" op="eq" value="1">
+          <WhileVar name="j" op="lt">
+            <Function name="Array_Length">
+              <Param name="array" var="ParentName" />
+            </Function>
+            <Insert type="Text">
+              <ModifyProp name="value" op="set" var="ParentName">
+                <RightIndex var="j" />
+              </ModifyProp>
+              <ModifyProp name="hyperlink" op="set" var="ParentHyperlink">
+                <RightIndex var="j" />
+              </ModifyProp>
+            </Insert>
+            <Insert type="Text">
+              <ModifyProp name="value" op="set" value=" > " />
+              <ModifyVar name="j" op="add" value="1" />
+            </Insert>
+          </WhileVar>
+        </IfVar>
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" var="PageName" />
+          <ModifyProp name="hyperlink" op="set" var="PageHyperlink" />
+        </Insert>
+        <ModifyProp name="fontSize" op="set" value="10" />
+      </Insert>
+    </Insert>
+  </For>
+</Macro>

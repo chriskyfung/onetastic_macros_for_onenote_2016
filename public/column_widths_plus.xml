@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-05-09 -->
+<Macro id="MA61FBC5536CB4FB4B3FDABDDA29C31DC" name="Column Widths Plus" category="Table" description="Sets the width of selected or all column(s) the selected table on the current page to the specified value." version="6">
+  <ModifyVar name="IsSelectOnly" op="set" value="0" />
+  <For first="Table">
+    <That hasProp="selection" op="not" value="none" />
+    <ModifyVar name="IsSelectOnly" op="set">
+      <Prompt type="dropdown" initialValue="All" values="All;Selected Only">Do you want to modify the ALL or ONLY Selected column(s) ?</Prompt>
+    </ModifyVar>
+  </For>
+  <IfVar name="IsSelectOnly" op="eq" value="0">
+    <IsRootOp />
+    <ModifyVar name="IsSelectOnly" op="set">
+      <Prompt type="message" initialValue="" values="">No table has been selected!</Prompt>
+    </ModifyVar>
+    <Else>
+      <IsRootOp />
+      <IfVar name="IsSelectOnly" op="eq" value="All">
+        <IsRootOp />
+        <ModifyVar name="ColumnWidth" op="set">
+          <Prompt type="text" initialValue="95" values="">Specify column width</Prompt>
+        </ModifyVar>
+        <For each="Column">
+          <Under a="Table">
+            <That hasProp="selection" op="not" value="none" />
+          </Under>
+          <ModifyProp name="width" op="set" var="ColumnWidth" />
+          <ModifyProp name="isLocked" op="set" value="true" />
+        </For>
+        <Else>
+          <IsRootOp />
+          <ModifyVar name="COLUMNWIDTH" op="set">
+            <Prompt type="text" initialValue="100" values="">For the selected table, the width of ALL columns will be:</Prompt>
+          </ModifyVar>
+          <ModifyVar name="i" op="set" value="0" />
+          <For each="Cell">
+            <That hasProp="selection" op="eq" value="partial" />
+            <ModifyVar name="ColIndex" op="set" prop="colIndex">
+              <LeftIndex var="i" />
+            </ModifyVar>
+            <ModifyVar name="i" op="add" value="1" />
+          </For>
+          <ModifyVar name="i" op="set" value="0" />
+          <WhileVar name="i" op="lt">
+            <Function name="Array_Length">
+              <Param name="array" var="ColIndex" />
+            </Function>
+            <IsRootOp />
+            <For each="Column">
+              <That hasProp="index" op="eq" var="ColIndex">
+                <RightIndex var="i" />
+              </That>
+              <Under a="Table">
+                <That hasProp="selection" op="not" value="none" />
+              </Under>
+              <ModifyProp name="width" op="set" var="COLUMNWIDTH" />
+              <ModifyProp name="isLocked" op="set" value="true" />
+              <ModifyVar name="i" op="add" value="1" />
+            </For>
+          </WhileVar>
+        </Else>
+      </IfVar>
+    </Else>
+  </IfVar>
+</Macro>

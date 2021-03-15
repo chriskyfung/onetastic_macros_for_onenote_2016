@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-05-09 -->
+<Macro id="M9817157C119B495E9B0B87B86F586552" name="Zotero Link in form of Author, Year" category="Link" description="Convert each Quick Copy of Zotero Scanable Cite { | Author, Year | | |zotero://select/items/#_########} on the current page to a text in form of &quot;Author, Year&quot; with a hyperlink linked to Zotero. Each cite must in an individual paragraph." version="6">
+  <For each="Text">
+    <IfProp name="hyperlink" op="containsCI" value="">
+      <IfProp name="value" op="containsCI" value="zotero://">
+        <ModifyVar name="T1" op="set" prop="value" />
+        <ModifyVar name="LL" op="set">
+          <Function name="String_Length">
+            <Param name="string" var="T1" />
+          </Function>
+        </ModifyVar>
+        <ModifyVar name="LL" op="sub" value="33" />
+        <ModifyVar name="T2" op="set">
+          <Function name="String_Substring">
+            <Param name="string" var="T1" />
+            <Param name="offset" var="LL" />
+            <Param name="count" value="32" />
+          </Function>
+        </ModifyVar>
+        <ModifyProp name="hyperlink" op="set" var="T2" />
+        <ModifyVar name="LL" op="sub" value="10" />
+        <ModifyProp name="value" op="set">
+          <Function name="String_Substring">
+            <Param name="string" var="T1" />
+            <Param name="offset" value="4" />
+            <Param name="count" var="LL" />
+          </Function>
+        </ModifyProp>
+      </IfProp>
+    </IfProp>
+  </For>
+</Macro>

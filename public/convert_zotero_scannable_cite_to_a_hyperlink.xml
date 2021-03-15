@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-05-09 -->
+<Macro id="MDE9DBB0C3A8546F9A533D600E9E6D858" name="Convert Zotero scannable cite to a Hyperlink" category="Link" description="Convert each Quick Copy of Zotero Scanable Cite  { | Author, Year | | |zotero://select/items/#_########} on the current page to a hyperlink linked to Zotero. Each cite must in an individual paragraph." version="6">
+  <For each="Text">
+    <IfProp name="hyperlink" op="containsCI" value="">
+      <IfProp name="value" op="containsCI" value="zotero://">
+        <ModifyVar name="T1" op="set" prop="value" />
+        <ModifyVar name="LL" op="set">
+          <Function name="String_Length">
+            <Param name="string" var="T1" />
+          </Function>
+        </ModifyVar>
+        <ModifyVar name="LL" op="sub" value="33" />
+        <ModifyVar name="T2" op="set">
+          <Function name="String_Substring">
+            <Param name="string" var="T1" />
+            <Param name="offset" var="LL" />
+            <Param name="count" value="32" />
+          </Function>
+        </ModifyVar>
+        <ModifyProp name="hyperlink" op="set" var="T2" />
+      </IfProp>
+    </IfProp>
+  </For>
+</Macro>
