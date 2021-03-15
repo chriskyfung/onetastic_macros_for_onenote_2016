@@ -1,658 +1,4540 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-07-30 -->
-<Macro id="M476EC47E319E4074AEF49CE79DBAC0EC" name="Search Multi-Keywords" category="Find" description="Search the paragraphs containing all the multiple keywords within a scope, and create a new page reporting the search results in the current section. Use semicolons (;) to separate the keywords, e.g. keyword1;keyword2;keyword3. There is (theoretically) no limit to the maximum number of keywords. But the speed is optimized for searching three keywords, and it slows down when more than three keywords are used. There are five opinions of scopes available, namely, “Current Page”, “Selection”, “Current Selection”, “Current Notebook”, and “All Notebooks”. It can take a long time, if search in notebook(s). Skip function is available, that is mainly for excluding pages that contain the previous search reports, to avoid duplicating the search results. Skip can take place in all scopes except the “Current Page” opinion. Change the texts as if you desired. It will skip the pages if their names contain the defined string. The report page lists the matched paragraphs and where they are found in." version="7">
-  <ModifyVar name="i" op="set" value="0" />
-  <ModifyVar name="search" op="set">
-    <Prompt type="text" initialValue="text1;text2;text3" values="">&amp;Find what</Prompt>
-  </ModifyVar>
-  <ModifyVar name="msg" op="set">
-    <Prompt type="message" initialValue="" values="">(use ; to separate multiple keywords)</Prompt>
-  </ModifyVar>
-  <ModifyVar name="scope" op="set">
-    <Prompt type="dropdown" initialValue="Current Page" values="Current Page;Selection;Current Section;Current Notebook;All Notebooks">&amp;Scope</Prompt>
-  </ModifyVar>
-  <ModifyVar name="ExcludePagesNamed" op="set">
-    <Prompt type="text" initialValue="Search Results of" values="" emptyOK="true">E&amp;xclude pages</Prompt>
-  </ModifyVar>
-  <ModifyVar name="isSkipPages" op="set">
-    <Prompt type="checkbox" initialValue="" values="">S&amp;kip pages named with the above texts</Prompt>
-  </ModifyVar>
-  <ModifyVar name="highlightkwords" op="set">
-    <Prompt type="checkbox" initialValue="" values="">Highlight</Prompt>
-  </ModifyVar>
-  <IfVar name="isSkipPages" op="not" value="true">
-    <IsRootOp />
-    <ModifyVar name="ExcludePagesNamed" op="set" value="" />
-  </IfVar>
-  <IfVar name="search" op="contains" value=";" collapsed="true">
-    <IsRootOp />
-    <ModifyVar name="keywords" op="set">
-      <Function name="String_Split">
-        <Param name="string" var="search" />
-        <Param name="delimiter" value=";" />
-      </Function>
-    </ModifyVar>
-    <ModifyVar name="multiWords" op="set">
-      <Function name="Array_Length">
-        <Param name="array" var="keywords" />
-      </Function>
-    </ModifyVar>
-    <IfVar name="multiWords" op="lt" value="3">
-      <IsRootOp />
-      <ModifyVar name="keywords" op="set" var="keywords">
-        <LeftIndex value="2" />
-        <RightIndex value="0" />
-      </ModifyVar>
-      <ModifyVar name="multiWords" op="set" value="2" />
-    </IfVar>
-    <Else>
-      <IsRootOp />
-      <ModifyVar name="keywords" op="set" var="search">
-        <LeftIndex value="0" />
-      </ModifyVar>
-      <ModifyVar name="keywords" op="set" var="search">
-        <LeftIndex value="1" />
-      </ModifyVar>
-      <ModifyVar name="keywords" op="set" var="search">
-        <LeftIndex value="2" />
-      </ModifyVar>
-      <ModifyVar name="multiWords" op="set" value="1" />
-    </Else>
-  </IfVar>
-  <IfVar name="scope" op="eq" value="Current Page" collapsed="true">
-    <IsRootOp />
-    <For each="Paragraph">
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="0" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="1" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="2" />
-      </That>
-      <ModifyVar name="paraID" op="set" prop="objectId">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <IfVar name="multiWords" op="lte" value="3">
-        <ModifyVar name="paraText" op="set" prop="text">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="paraLink" op="set" prop="hyperlink">
-          <LeftIndex var="i" />
-        </ModifyVar>
-      </IfVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </For>
-    <ModifyVar name="hints" op="set" var="i" />
-    <IfVar name="multiWords" op="gt" value="3">
-      <IsRootOp />
-      <ModifyVar name="j" op="set" value="3" />
-      <WhileVar name="j" op="lt" var="multiWords">
-        <IsRootOp />
-        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
-        <ModifyVar name="WordsRemain" op="sub" var="j" />
-        <ModifyVar name="j1" op="set" var="j" />
-        <ModifyVar name="j2" op="set" var="j" />
-        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
-          <IsRootOp />
-          <ModifyVar name="j1" op="add" value="1" />
-          <ModifyVar name="j2" op="add" value="2" />
-          <Else collapsed="true">
-            <IsRootOp />
-            <IfVar name="WordsRemain" op="eq" value="2">
-              <IsRootOp />
-              <ModifyVar name="j1" op="add" value="1" />
-            </IfVar>
-          </Else>
-        </IfVar>
-        <ModifyVar name="i" op="set" value="0" />
-        <ModifyVar name="k" op="set" value="0" />
-        <WhileVar name="i" op="lt" var="hints">
-          <IsRootOp />
-          <For first="Paragraph">
-            <That hasProp="objectId" op="eq" var="paraID">
-              <RightIndex var="i" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j1" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j2" />
-            </That>
-            <ModifyVar name="paraID" op="set" prop="objectId">
-              <LeftIndex var="k" />
-            </ModifyVar>
-            <IfVar name="WordsRemain" op="lte" value="3">
-              <ModifyVar name="paraText" op="set" prop="text">
-                <LeftIndex var="k" />
-              </ModifyVar>
-              <ModifyVar name="paraLink" op="set" prop="hyperlink">
-                <LeftIndex var="k" />
-              </ModifyVar>
-            </IfVar>
-            <ModifyVar name="k" op="add" value="1" />
-          </For>
-          <ModifyVar name="i" op="add" value="1" />
-        </WhileVar>
-        <ModifyVar name="j" op="add" value="3" />
-        <ModifyVar name="hints" op="set" var="k" />
-      </WhileVar>
-    </IfVar>
-  </IfVar>
-  <IfVar name="scope" op="eq" value="Selection" collapsed="true">
-    <IsRootOp />
-    <For each="Paragraph" in="CurrentSection">
-      <That hasProp="selection" op="not" value="none" />
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="0" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="1" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="2" />
-      </That>
-      <Under a="Page">
-        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-        <That hasProp="selection" op="not" value="none" />
-        <That hasProp="isInRecycleBin" op="eq" value="false" />
-      </Under>
-      <ModifyVar name="paraID" op="set" prop="objectId">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <IfVar name="multiWords" op="lte" value="3" collapsed="true">
-        <ModifyVar name="paraText" op="set" prop="text">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="paraLink" op="set" prop="hyperlink">
-          <LeftIndex var="i" />
-        </ModifyVar>
-      </IfVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </For>
-    <ModifyVar name="hints" op="set" var="i" />
-    <IfVar name="multiWords" op="gt" value="3">
-      <IsRootOp />
-      <ModifyVar name="j" op="set" value="3" />
-      <WhileVar name="j" op="lt" var="multiWords">
-        <IsRootOp />
-        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
-        <ModifyVar name="WordsRemain" op="sub" var="j" />
-        <ModifyVar name="j1" op="set" var="j" />
-        <ModifyVar name="j2" op="set" var="j" />
-        <IfVar name="WordsRemain" op="gte" value="3">
-          <IsRootOp />
-          <ModifyVar name="j1" op="add" value="1" />
-          <ModifyVar name="j2" op="add" value="2" />
-          <Else collapsed="true">
-            <IsRootOp />
-            <IfVar name="WordsRemain" op="eq" value="2">
-              <IsRootOp />
-              <ModifyVar name="j1" op="add" value="1" />
-            </IfVar>
-          </Else>
-        </IfVar>
-        <ModifyVar name="i" op="set" value="0" />
-        <ModifyVar name="k" op="set" value="0" />
-        <WhileVar name="i" op="lt" var="hints">
-          <IsRootOp />
-          <For first="Paragraph" in="CurrentSection">
-            <That hasProp="selection" op="not" value="none" />
-            <That hasProp="objectId" op="eq" var="paraID">
-              <RightIndex var="i" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j1" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j2" />
-            </That>
-            <Under a="Page">
-              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-              <That hasProp="selection" op="not" value="none" />
-              <That hasProp="isInRecycleBin" op="eq" value="false" />
-            </Under>
-            <ModifyVar name="paraID" op="set" prop="objectId">
-              <LeftIndex var="k" />
-            </ModifyVar>
-            <IfVar name="WordsRemain" op="lte" value="3">
-              <ModifyVar name="paraText" op="set" prop="text">
-                <LeftIndex var="k" />
-              </ModifyVar>
-              <ModifyVar name="paraLink" op="set" prop="hyperlink">
-                <LeftIndex var="k" />
-              </ModifyVar>
-            </IfVar>
-            <ModifyVar name="k" op="add" value="1" />
-          </For>
-          <ModifyVar name="i" op="add" value="1" />
-        </WhileVar>
-        <ModifyVar name="j" op="add" value="3" />
-        <ModifyVar name="hints" op="set" var="k" />
-      </WhileVar>
-    </IfVar>
-  </IfVar>
-  <IfVar name="scope" op="eq" value="Current Section" collapsed="true">
-    <IsRootOp />
-    <For each="Paragraph" in="CurrentSection">
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="0" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="1" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="2" />
-      </That>
-      <Under a="Page">
-        <That hasProp="isInRecycleBin" op="eq" value="false" />
-        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-      </Under>
-      <ModifyVar name="paraID" op="set" prop="objectId">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <IfVar name="multiWords" op="lte" value="3">
-        <ModifyVar name="paraText" op="set" prop="text">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="paraLink" op="set" prop="hyperlink">
-          <LeftIndex var="i" />
-        </ModifyVar>
-      </IfVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </For>
-    <ModifyVar name="hints" op="set" var="i" />
-    <IfVar name="multiWords" op="gt" value="3">
-      <IsRootOp />
-      <ModifyVar name="j" op="set" value="3" />
-      <WhileVar name="j" op="lt" var="multiWords">
-        <IsRootOp />
-        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
-        <ModifyVar name="WordsRemain" op="sub" var="j" />
-        <ModifyVar name="j1" op="set" var="j" />
-        <ModifyVar name="j2" op="set" var="j" />
-        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
-          <IsRootOp />
-          <ModifyVar name="j1" op="add" value="1" />
-          <ModifyVar name="j2" op="add" value="2" />
-          <Else collapsed="true">
-            <IsRootOp />
-            <IfVar name="WordsRemain" op="eq" value="2">
-              <IsRootOp />
-              <ModifyVar name="j1" op="add" value="1" />
-            </IfVar>
-          </Else>
-        </IfVar>
-        <ModifyVar name="i" op="set" value="0" />
-        <ModifyVar name="k" op="set" value="0" />
-        <WhileVar name="i" op="lt" var="hints">
-          <IsRootOp />
-          <For first="Paragraph" in="CurrentSection">
-            <That hasProp="objectId" op="eq" var="paraID">
-              <RightIndex var="i" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j1" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j2" />
-            </That>
-            <Under a="Page">
-              <That hasProp="isInRecycleBin" op="eq" value="false" />
-              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-            </Under>
-            <ModifyVar name="paraID" op="set" prop="objectId">
-              <LeftIndex var="k" />
-            </ModifyVar>
-            <IfVar name="WordsRemain" op="lte" value="3">
-              <ModifyVar name="paraText" op="set" prop="text">
-                <LeftIndex var="k" />
-              </ModifyVar>
-              <ModifyVar name="paraLink" op="set" prop="hyperlink">
-                <LeftIndex var="k" />
-              </ModifyVar>
-            </IfVar>
-            <ModifyVar name="k" op="add" value="1" />
-          </For>
-          <ModifyVar name="i" op="add" value="1" />
-        </WhileVar>
-        <ModifyVar name="j" op="add" value="3" />
-        <ModifyVar name="hints" op="set" var="k" />
-      </WhileVar>
-    </IfVar>
-  </IfVar>
-  <IfVar name="scope" op="eq" value="Current Notebook" collapsed="true">
-    <IsRootOp />
-    <For each="Paragraph" in="CurrentNotebook">
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="0" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="1" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="2" />
-      </That>
-      <Under a="Page">
-        <That hasProp="isInRecycleBin" op="eq" value="false" />
-        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-      </Under>
-      <ModifyVar name="paraID" op="set" prop="objectId">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <IfVar name="multiWords" op="lte" value="3">
-        <ModifyVar name="paraText" op="set" prop="text">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="paraLink" op="set" prop="hyperlink">
-          <LeftIndex var="i" />
-        </ModifyVar>
-      </IfVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </For>
-    <ModifyVar name="hints" op="set" var="i" />
-    <IfVar name="multiWords" op="gt" value="3">
-      <IsRootOp />
-      <ModifyVar name="j" op="set" value="3" />
-      <WhileVar name="j" op="lt" var="multiWords">
-        <IsRootOp />
-        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
-        <ModifyVar name="WordsRemain" op="sub" var="j" />
-        <ModifyVar name="j1" op="set" var="j" />
-        <ModifyVar name="j2" op="set" var="j" />
-        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
-          <IsRootOp />
-          <ModifyVar name="j1" op="add" value="1" />
-          <ModifyVar name="j2" op="add" value="2" />
-          <Else collapsed="true">
-            <IsRootOp />
-            <IfVar name="WordsRemain" op="eq" value="2">
-              <IsRootOp />
-              <ModifyVar name="j1" op="add" value="1" />
-            </IfVar>
-          </Else>
-        </IfVar>
-        <ModifyVar name="i" op="set" value="0" />
-        <ModifyVar name="k" op="set" value="0" />
-        <WhileVar name="i" op="lt" var="hints">
-          <IsRootOp />
-          <For first="Paragraph" in="CurrentNotebook">
-            <That hasProp="objectId" op="eq" var="paraID">
-              <RightIndex var="i" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j1" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j2" />
-            </That>
-            <Under a="Page">
-              <That hasProp="isInRecycleBin" op="eq" value="false" />
-              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-            </Under>
-            <ModifyVar name="paraID" op="set" prop="objectId">
-              <LeftIndex var="k" />
-            </ModifyVar>
-            <IfVar name="WordsRemain" op="lte" value="3">
-              <ModifyVar name="paraText" op="set" prop="text">
-                <LeftIndex var="k" />
-              </ModifyVar>
-              <ModifyVar name="paraLink" op="set" prop="hyperlink">
-                <LeftIndex var="k" />
-              </ModifyVar>
-            </IfVar>
-            <ModifyVar name="k" op="add" value="1" />
-          </For>
-          <ModifyVar name="i" op="add" value="1" />
-        </WhileVar>
-        <ModifyVar name="j" op="add" value="3" />
-        <ModifyVar name="hints" op="set" var="k" />
-      </WhileVar>
-    </IfVar>
-  </IfVar>
-  <IfVar name="scope" op="eq" value="All Notebooks" collapsed="true">
-    <IsRootOp />
-    <For each="Paragraph" in="AllNotebooks">
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="0" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="1" />
-      </That>
-      <That hasProp="text" op="containsCI" var="keywords">
-        <RightIndex value="2" />
-      </That>
-      <Under a="Page">
-        <That hasProp="isInRecycleBin" op="eq" value="false" />
-        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-      </Under>
-      <ModifyVar name="paraID" op="set" prop="objectId">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <IfVar name="multiWords" op="lte" value="3" collapsed="true">
-        <ModifyVar name="paraText" op="set" prop="text">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="paraLink" op="set" prop="hyperlink">
-          <LeftIndex var="i" />
-        </ModifyVar>
-      </IfVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </For>
-    <ModifyVar name="hints" op="set" var="i" />
-    <IfVar name="multiWords" op="gt" value="3">
-      <IsRootOp />
-      <ModifyVar name="j" op="set" value="3" />
-      <WhileVar name="j" op="lt" var="multiWords" collapsed="true">
-        <IsRootOp />
-        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
-        <ModifyVar name="WordsRemain" op="sub" var="j" />
-        <ModifyVar name="j1" op="set" var="j" />
-        <ModifyVar name="j2" op="set" var="j" />
-        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
-          <IsRootOp />
-          <ModifyVar name="j1" op="add" value="1" />
-          <ModifyVar name="j2" op="add" value="2" />
-          <Else collapsed="true">
-            <IsRootOp />
-            <IfVar name="WordsRemain" op="eq" value="2">
-              <IsRootOp />
-              <ModifyVar name="j1" op="add" value="1" />
-            </IfVar>
-          </Else>
-        </IfVar>
-        <ModifyVar name="i" op="set" value="0" />
-        <ModifyVar name="k" op="set" value="0" />
-        <WhileVar name="i" op="lt" var="hints" collapsed="true">
-          <IsRootOp />
-          <For first="Paragraph" in="AllNotebooks">
-            <That hasProp="objectId" op="eq" var="paraID">
-              <RightIndex var="i" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j1" />
-            </That>
-            <That hasProp="text" op="containsCI" var="keywords">
-              <RightIndex var="j2" />
-            </That>
-            <Under a="Page">
-              <That hasProp="isInRecycleBin" op="eq" value="false" />
-              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
-            </Under>
-            <ModifyVar name="paraID" op="set" prop="objectId">
-              <LeftIndex var="k" />
-            </ModifyVar>
-            <IfVar name="WordsRemain" op="lte" value="3">
-              <ModifyVar name="paraText" op="set" prop="text">
-                <LeftIndex var="k" />
-              </ModifyVar>
-              <ModifyVar name="paraLink" op="set" prop="hyperlink">
-                <LeftIndex var="k" />
-              </ModifyVar>
-            </IfVar>
-            <ModifyVar name="k" op="add" value="1" />
-          </For>
-          <ModifyVar name="i" op="add" value="1" />
-        </WhileVar>
-        <ModifyVar name="j" op="add" value="3" />
-        <ModifyVar name="hints" op="set" var="k" />
-      </WhileVar>
-    </IfVar>
-  </IfVar>
-  <IfVar name="hints" op="gt" value="0">
-    <IsRootOp />
-    <ModifyVar name="k" op="set" value="0" />
-    <For first="Section" in="CurrentSection">
-      <Insert type="Page" atIndex="0">
-        <ModifyVar name="pageID" op="set" prop="id" />
-        <Insert type="Outline" collapsed="true">
-          <WhileVar name="k" op="lt" var="hints">
-            <Insert type="Paragraph">
-              <Insert type="Text">
-                <ModifyVar name="index" op="set" var="k" />
-                <ModifyVar name="index" op="add" value="1" />
-                <ModifyProp name="value" op="set" var="index" />
-                <ModifyProp name="value" op="add" value=". " />
-              </Insert>
-              <Insert type="Text" collapsed="true">
-                <ModifyProp name="value" op="set" value="Found in: " />
-              </Insert>
-              <Insert type="Text">
-                <ModifyVar name="tempLink" op="set" var="paraLink">
-                  <RightIndex var="k" />
-                </ModifyVar>
-                <IfVar name="tempLink" op="contains" value="%20">
-                  <ModifyVar name="tempLinkSplit" op="set">
-                    <Function name="String_Split">
-                      <Param name="string" var="tempLink" />
-                      <Param name="delimiter" value="%20" />
-                    </Function>
-                  </ModifyVar>
-                  <ModifyVar name="tempLink" op="set" value="" />
-                  <ModifyVar name="i" op="set" value="0" />
-                  <WhileVar name="i" op="lt">
-                    <Function name="Array_Length">
-                      <Param name="array" var="tempLinkSplit" />
-                    </Function>
-                    <ModifyVar name="tempLink" op="add" var="tempLinkSplit">
-                      <RightIndex var="i" />
-                    </ModifyVar>
-                    <ModifyVar name="tempLink" op="add" value=" " />
-                    <ModifyVar name="i" op="add" value="1" />
-                  </WhileVar>
-                </IfVar>
-                <ModifyVar name="linkComp" op="set">
-                  <Function name="String_Split">
-                    <Param name="string" var="tempLink" />
-                    <Param name="delimiter" value=".one#" />
-                  </Function>
-                </ModifyVar>
-                <ModifyVar name="linkHead" op="set" var="linkComp">
-                  <RightIndex value="0" />
-                </ModifyVar>
-                <ModifyVar name="whereComp1" op="set">
-                  <Function name="String_Split">
-                    <Param name="string" var="linkHead" />
-                    <Param name="delimiter" value="/" />
-                  </Function>
-                </ModifyVar>
-                <ModifyVar name="nS" op="set">
-                  <Function name="Array_Length">
-                    <Param name="array" var="whereComp1" />
-                  </Function>
-                </ModifyVar>
-                <ModifyVar name="nS" op="sub" value="1" />
-                <ModifyVar name="whichSection" op="set" var="whereComp1">
-                  <RightIndex var="nS" />
-                </ModifyVar>
-                <ModifyVar name="nS" op="sub" value="1" />
-                <ModifyVar name="whichNoteBook" op="set" var="whereComp1">
-                  <RightIndex var="nS" />
-                </ModifyVar>
-                <ModifyVar name="linkTail" op="set">
-                  <Function name="String_Split">
-                    <Param name="string" var="linkComp">
-                      <RightIndex value="1" />
-                    </Param>
-                    <Param name="delimiter" value="&amp;section-id=" />
-                  </Function>
-                </ModifyVar>
-                <ModifyVar name="whichPage" op="set" var="linkTail">
-                  <RightIndex value="0" />
-                </ModifyVar>
-                <ModifyProp name="value" op="set" var="whichNoteBook" />
-                <ModifyProp name="value" op="add" value=" > " />
-                <ModifyProp name="value" op="add" var="whichSection" />
-                <ModifyProp name="value" op="add" value=" > " />
-                <ModifyProp name="value" op="add" var="whichPage" />
-                <ModifyProp name="hyperlink" op="set" var="paraLink">
-                  <RightIndex var="k" />
-                </ModifyProp>
-              </Insert>
-              <ModifyProp name="fontSize" op="set" value="10" />
-              <ModifyProp name="fontColor" op="set" value="gray" />
-            </Insert>
-            <Insert type="Paragraph">
-              <Insert type="Text" collapsed="true">
-                <ModifyProp name="value" op="set" var="paraText">
-                  <RightIndex var="k" />
-                </ModifyProp>
-              </Insert>
-            </Insert>
-            <Insert type="Paragraph" />
-            <ModifyVar name="k" op="add" value="1" />
-          </WhileVar>
-        </Insert>
-        <ModifyProp name="color" op="set" value="#ffeeee" />
-        <ModifyVar name="newpageID" op="set" prop="id" />
-      </Insert>
-    </For>
-    <For first="Paragraph" in="CurrentSection">
-      <Under a="Page">
-        <That hasProp="id" op="eq" var="pageID" />
-      </Under>
-      <ModifyProp name="text" op="set" value="Search Results of: " />
-      <ModifyProp name="text" op="add" var="search" />
-      <ModifyProp name="text" op="add" value=" in " />
-      <ModifyProp name="text" op="add" var="scope" />
-    </For>
-  </IfVar>
-  <ModifyVar name="msg" op="set" var="hints" />
-  <ModifyVar name="msg" op="add" value=" instances of {" />
-  <ModifyVar name="msg" op="add" var="search" />
-  <ModifyVar name="msg" op="add" value="} are found." />
-  <ModifyVar name="msg" op="set">
-    <Prompt type="message" initialValue="" values="" var="msg"></Prompt>
-  </ModifyVar>
-  <ModifyVar name="k" op="set" value="0" />
-  <IfVar name="highlightkwords" op="eq" value="true">
-    <IsRootOp />
-    <WhileVar name="k" op="lt" var="multiWords">
-      <IsRootOp />
-      <ModifyVar name="highlightkwords" op="set" var="keywords">
-        <RightIndex var="k" />
-      </ModifyVar>
-      <For each="Text">
-        <That hasProp="value" op="eqCI" var="highlightkwords" />
-        <ModifyProp name="highlightColor" op="set" value="pink" />
-      </For>
-      <ModifyVar name="k" op="add" value="1" />
-    </WhileVar>
-  </IfVar>
+<Macro id="M476EC47E319E4074AEF49CE79DBAC0EC" name="Search Multi-Keywords" category="Find" description="Search the paragraphs containing all the multiple keywords within a scope, and create a new page reporting the search results in the current section. Use semicolons (;) to separate the keywords, e.g. keyword1;keyword2;keyword3. There is (theoretically) no limit to the maximum number of keywords. But the speed is optimized for searching three keywords, and it slows down when more than three keywords are used. There are five opinions of scopes available, namely, “Current Page”, “Selection”, “Current Selection”, “Current Notebook”, and “All Notebooks”. It can take a long time, if search in notebook(s). Skip function is available, that is mainly for excluding pages that contain the previous search reports, to avoid duplicating the search results. Skip can take place in all scopes except the “Current Page” opinion. Change the texts as if you desired. It will skip the pages if their names contain the defined string. The report page lists the matched paragraphs and where they are found in." publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 7 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>i</Var>
+      </Left>
+      <Right>0</Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(search) --> set prompt(&amp;Find what)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>dialog_box</Var>
+      </Left>
+      <Right>
+        <Call name="DialogBox_Create">
+          <Arg></Arg>
+        </Call>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddTextBox">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>&amp;Find what</Arg>
+      <Arg>control_1</Arg>
+      <Arg>text1;text2;text3</Arg>
+      <Arg>false</Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddLabel">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>(use ; to separate multiple keywords)</Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddDropDown">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>&amp;Scope</Arg>
+      <Arg>control_3</Arg>
+      <Arg>Current Page</Arg>
+      <Arg>
+        <Call name="Array">
+          <Arg>Current Page</Arg>
+          <Arg>Selection</Arg>
+          <Arg>Current Section</Arg>
+          <Arg>Current Notebook</Arg>
+          <Arg>All Notebooks</Arg>
+        </Call>
+      </Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddTextBox">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>E&amp;xclude pages</Arg>
+      <Arg>control_4</Arg>
+      <Arg>Search Results of</Arg>
+      <Arg>true</Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddCheckBox">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>S&amp;kip pages named with the above texts</Arg>
+      <Arg>control_5</Arg>
+      <Arg></Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddCheckBox">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>Highlight</Arg>
+      <Arg>control_6</Arg>
+      <Arg></Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_Show">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>search</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_1</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(msg) --> set prompt((use ; to separate multiple keywords))" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>msg</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_2</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(scope) --> set prompt(&amp;Scope)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>scope</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_3</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(ExcludePagesNamed) --> set prompt(E&amp;xclude pages)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>ExcludePagesNamed</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_4</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(isSkipPages) --> set prompt(S&amp;kip pages named with the above texts)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>isSkipPages</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_5</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(highlightkwords) --> set prompt(Highlight)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>highlightkwords</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_6</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="If variable(isSkipPages) not &quot;true&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name="!=">
+        <Left>
+          <Var>isSkipPages</Var>
+        </Left>
+        <Right>true</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="Modify variable(ExcludePagesNamed) --> set &quot;&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>ExcludePagesNamed</Var>
+        </Left>
+        <Right></Right>
+      </BinaryOp>
+    </Expression>
+  </If>
+  <Comment text="If variable(search) contains &quot;;&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <Call name="String_Contains">
+        <Arg>
+          <Var>search</Var>
+        </Arg>
+        <Arg>;</Arg>
+        <Arg>false</Arg>
+      </Call>
+    </Condition>
+    <Comment text="Modify variable(keywords) --> set String_Split(variable(search), &quot;;&quot;)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>keywords</Var>
+        </Left>
+        <Right>
+          <Call name="String_Split">
+            <Arg>
+              <Var>search</Var>
+            </Arg>
+            <Arg>;</Arg>
+          </Call>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="Modify variable(multiWords) --> set Array_Length(variable(keywords))" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>multiWords</Var>
+        </Left>
+        <Right>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>keywords</Var>
+            </Arg>
+          </Call>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="If variable(multiWords) lt &quot;3&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="&lt;">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(keywords) --> set variable(keywords)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>keywords</Var>
+            <Index>2</Index>
+          </Left>
+          <Right>
+            <Var>keywords</Var>
+            <Index>0</Index>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Modify variable(multiWords) --> set &quot;2&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>2</Right>
+        </BinaryOp>
+      </Expression>
+    </If>
+  </If>
+  <Else>
+    <Comment text="Modify variable(keywords) --> set variable(search)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>keywords</Var>
+          <Index>0</Index>
+        </Left>
+        <Right>
+          <Var>search</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="Modify variable(keywords) --> set variable(search)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>keywords</Var>
+          <Index>1</Index>
+        </Left>
+        <Right>
+          <Var>search</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="Modify variable(keywords) --> set variable(search)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>keywords</Var>
+          <Index>2</Index>
+        </Left>
+        <Right>
+          <Var>search</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="Modify variable(multiWords) --> set &quot;1&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>multiWords</Var>
+        </Left>
+        <Right>1</Right>
+      </BinaryOp>
+    </Expression>
+  </Else>
+  <Comment text="If variable(scope) eq &quot;Current Page&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>scope</Var>
+        </Left>
+        <Right>Current Page</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="For each Paragraph in CurrentPage" />
+    <ForEach var="ParagraphObject_7">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" />
+          </Arg>
+        </Call>
+      </Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_7</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>0</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_7</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>1</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_7</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>2</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <Comment text="Modify variable(paraID) --> set property(objectId)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>paraID</Var>
+            <Index>
+              <Var>i</Var>
+            </Index>
+          </Left>
+          <Right>
+            <Var>ParagraphObject_7</Var>
+            <Prop>objectId</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="If variable(multiWords) lte &quot;3&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name="&lt;=">
+            <Left>
+              <Var>multiWords</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(paraText) --> set property(text)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraText</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_7</Var>
+              <Prop>text</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_7</Var>
+              <Prop>hyperlink</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </If>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var>
+          </Left>
+          <Right>1</Right>
+        </BinaryOp>
+      </Expression>
+    </ForEach>
+    <Comment text="Modify variable(hints) --> set variable(i)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>hints</Var>
+        </Left>
+        <Right>
+          <Var>i</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="If variable(multiWords) gt &quot;3&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(j) --> set &quot;3&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="While variable(j) lt variable(multiWords)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(WordsRemain) --> set variable(multiWords)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(WordsRemain) --> sub variable(j)" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j1) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j1</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j2) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j2</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="If variable(WordsRemain) gte &quot;3&quot;" />
+        <If collapsed="true">
+          <Condition>
+            <BinaryOp name=">=">
+              <Left>
+                <Var>WordsRemain</Var>
+              </Left>
+              <Right>3</Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j1</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(j2) --> add &quot;2&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j2</Var>
+              </Left>
+              <Right>2</Right>
+            </BinaryOp>
+          </Expression>
+        </If>
+        <Else collapsed="true">
+          <Comment text="If variable(WordsRemain) eq &quot;2&quot;" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>WordsRemain</Var>
+                </Left>
+                <Right>2</Right>
+              </BinaryOp>
+            </Condition>
+            <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j1</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+          </If>
+        </Else>
+        <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>i</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="While variable(i) lt variable(hints)" />
+        <While>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>
+                <Var>hints</Var>
+              </Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="For first Paragraph in CurrentPage" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObjects_9</Var>
+              </Left>
+              <Right>
+                <Call name="QueryObjects">
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Call name="GetCurrentPage" />
+                  </Arg>
+                </Call>
+              </Right>
+            </BinaryOp>
+          </Expression>
+          <While>
+            <Condition>
+              <BinaryOp name=">">
+                <Left>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>ParagraphObjects_9</Var>
+                    </Arg>
+                  </Call>
+                </Left>
+                <Right>0</Right>
+              </BinaryOp>
+            </Condition>
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParagraphObject_8</Var>
+                </Left>
+                <Right>
+                  <Call name="Array_PopFront">
+                    <Arg>
+                      <Var>ParagraphObjects_9</Var>
+                    </Arg>
+                  </Call>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="==">
+                      <Left>
+                        <Var>ParagraphObject_8</Var>
+                        <Prop>objectId</Prop>
+                      </Left>
+                      <Right>
+                        <Var>paraID</Var>
+                        <Index>
+                          <Var>i</Var>
+                        </Index>
+                      </Right>
+                    </BinaryOp>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_8</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_8</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j1</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_8</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j2</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <Comment text="Modify variable(paraID) --> set property(objectId)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>paraID</Var>
+                  <Index>
+                    <Var>k</Var>
+                  </Index>
+                </Left>
+                <Right>
+                  <Var>ParagraphObject_8</Var>
+                  <Prop>objectId</Prop>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="If variable(WordsRemain) lte &quot;3&quot;" />
+            <If>
+              <Condition>
+                <BinaryOp name="&lt;=">
+                  <Left>
+                    <Var>WordsRemain</Var>
+                  </Left>
+                  <Right>3</Right>
+                </BinaryOp>
+              </Condition>
+              <Comment text="Modify variable(paraText) --> set property(text)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraText</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_8</Var>
+                    <Prop>text</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+              <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraLink</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_8</Var>
+                    <Prop>hyperlink</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+            </If>
+            <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>k</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+            <Break>1</Break>
+          </While>
+          <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+        </While>
+        <Comment text="Modify variable(j) --> add &quot;3&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(hints) --> set variable(k)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>hints</Var>
+            </Left>
+            <Right>
+              <Var>k</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </While>
+    </If>
+  </If>
+  <Comment text="If variable(scope) eq &quot;Selection&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>scope</Var>
+        </Left>
+        <Right>Selection</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="For each Paragraph in CurrentSection" />
+    <ForEach var="ParagraphObject_10">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetCurrentSection" />
+          </Arg>
+        </Call>
+      </Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <BinaryOp name="!=">
+                <Left>
+                  <Var>ParagraphObject_10</Var>
+                  <Prop>selection</Prop>
+                </Left>
+                <Right>none</Right>
+              </BinaryOp>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_10</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>0</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_10</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>1</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_10</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>2</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="GetAncestorOfType">
+                <Arg>
+                  <Var>ParagraphObject_10</Var>
+                </Arg>
+                <Arg>Page</Arg>
+                <Arg>
+                  <Var>AncestorOfType_Page_11</Var>
+                </Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <Else>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>AncestorOfType_Page_11</Var>
+                        <Prop>name</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>ExcludePagesNamed</Var>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="!=">
+                  <Left>
+                    <Var>AncestorOfType_Page_11</Var>
+                    <Prop>selection</Prop>
+                  </Left>
+                  <Right>none</Right>
+                </BinaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>AncestorOfType_Page_11</Var>
+                    <Prop>isInRecycleBin</Prop>
+                  </Left>
+                  <Right>false</Right>
+                </BinaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+      </Else>
+      <Comment text="Modify variable(paraID) --> set property(objectId)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>paraID</Var>
+            <Index>
+              <Var>i</Var>
+            </Index>
+          </Left>
+          <Right>
+            <Var>ParagraphObject_10</Var>
+            <Prop>objectId</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="If variable(multiWords) lte &quot;3&quot;" />
+      <If collapsed="true">
+        <Condition>
+          <BinaryOp name="&lt;=">
+            <Left>
+              <Var>multiWords</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(paraText) --> set property(text)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraText</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_10</Var>
+              <Prop>text</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_10</Var>
+              <Prop>hyperlink</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </If>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var>
+          </Left>
+          <Right>1</Right>
+        </BinaryOp>
+      </Expression>
+    </ForEach>
+    <Comment text="Modify variable(hints) --> set variable(i)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>hints</Var>
+        </Left>
+        <Right>
+          <Var>i</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="If variable(multiWords) gt &quot;3&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(j) --> set &quot;3&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="While variable(j) lt variable(multiWords)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(WordsRemain) --> set variable(multiWords)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(WordsRemain) --> sub variable(j)" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j1) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j1</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j2) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j2</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="If variable(WordsRemain) gte &quot;3&quot;" />
+        <If>
+          <Condition>
+            <BinaryOp name=">=">
+              <Left>
+                <Var>WordsRemain</Var>
+              </Left>
+              <Right>3</Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j1</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(j2) --> add &quot;2&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j2</Var>
+              </Left>
+              <Right>2</Right>
+            </BinaryOp>
+          </Expression>
+        </If>
+        <Else collapsed="true">
+          <Comment text="If variable(WordsRemain) eq &quot;2&quot;" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>WordsRemain</Var>
+                </Left>
+                <Right>2</Right>
+              </BinaryOp>
+            </Condition>
+            <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j1</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+          </If>
+        </Else>
+        <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>i</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="While variable(i) lt variable(hints)" />
+        <While>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>
+                <Var>hints</Var>
+              </Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="For first Paragraph in CurrentSection" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObjects_14</Var>
+              </Left>
+              <Right>
+                <Call name="QueryObjects">
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Call name="GetCurrentSection" />
+                  </Arg>
+                </Call>
+              </Right>
+            </BinaryOp>
+          </Expression>
+          <While>
+            <Condition>
+              <BinaryOp name=">">
+                <Left>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>ParagraphObjects_14</Var>
+                    </Arg>
+                  </Call>
+                </Left>
+                <Right>0</Right>
+              </BinaryOp>
+            </Condition>
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParagraphObject_12</Var>
+                </Left>
+                <Right>
+                  <Call name="Array_PopFront">
+                    <Arg>
+                      <Var>ParagraphObjects_14</Var>
+                    </Arg>
+                  </Call>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="!=">
+                      <Left>
+                        <Var>ParagraphObject_12</Var>
+                        <Prop>selection</Prop>
+                      </Left>
+                      <Right>none</Right>
+                    </BinaryOp>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="==">
+                      <Left>
+                        <Var>ParagraphObject_12</Var>
+                        <Prop>objectId</Prop>
+                      </Left>
+                      <Right>
+                        <Var>paraID</Var>
+                        <Index>
+                          <Var>i</Var>
+                        </Index>
+                      </Right>
+                    </BinaryOp>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_12</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_12</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j1</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_12</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j2</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="GetAncestorOfType">
+                      <Arg>
+                        <Var>ParagraphObject_12</Var>
+                      </Arg>
+                      <Arg>Page</Arg>
+                      <Arg>
+                        <Var>AncestorOfType_Page_13</Var>
+                      </Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <Else>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <UnaryOp name="!">
+                        <Operand>
+                          <Call name="String_Contains">
+                            <Arg>
+                              <Var>AncestorOfType_Page_13</Var>
+                              <Prop>name</Prop>
+                            </Arg>
+                            <Arg>
+                              <Var>ExcludePagesNamed</Var>
+                            </Arg>
+                            <Arg>true</Arg>
+                          </Call>
+                        </Operand>
+                      </UnaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <BinaryOp name="!=">
+                        <Left>
+                          <Var>AncestorOfType_Page_13</Var>
+                          <Prop>selection</Prop>
+                        </Left>
+                        <Right>none</Right>
+                      </BinaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <BinaryOp name="==">
+                        <Left>
+                          <Var>AncestorOfType_Page_13</Var>
+                          <Prop>isInRecycleBin</Prop>
+                        </Left>
+                        <Right>false</Right>
+                      </BinaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+            </Else>
+            <Comment text="Modify variable(paraID) --> set property(objectId)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>paraID</Var>
+                  <Index>
+                    <Var>k</Var>
+                  </Index>
+                </Left>
+                <Right>
+                  <Var>ParagraphObject_12</Var>
+                  <Prop>objectId</Prop>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="If variable(WordsRemain) lte &quot;3&quot;" />
+            <If>
+              <Condition>
+                <BinaryOp name="&lt;=">
+                  <Left>
+                    <Var>WordsRemain</Var>
+                  </Left>
+                  <Right>3</Right>
+                </BinaryOp>
+              </Condition>
+              <Comment text="Modify variable(paraText) --> set property(text)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraText</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_12</Var>
+                    <Prop>text</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+              <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraLink</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_12</Var>
+                    <Prop>hyperlink</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+            </If>
+            <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>k</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+            <Break>1</Break>
+          </While>
+          <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+        </While>
+        <Comment text="Modify variable(j) --> add &quot;3&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(hints) --> set variable(k)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>hints</Var>
+            </Left>
+            <Right>
+              <Var>k</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </While>
+    </If>
+  </If>
+  <Comment text="If variable(scope) eq &quot;Current Section&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>scope</Var>
+        </Left>
+        <Right>Current Section</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="For each Paragraph in CurrentSection" />
+    <ForEach var="ParagraphObject_15">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetCurrentSection" />
+          </Arg>
+        </Call>
+      </Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_15</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>0</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_15</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>1</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_15</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>2</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="GetAncestorOfType">
+                <Arg>
+                  <Var>ParagraphObject_15</Var>
+                </Arg>
+                <Arg>Page</Arg>
+                <Arg>
+                  <Var>AncestorOfType_Page_16</Var>
+                </Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <Else>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>AncestorOfType_Page_16</Var>
+                    <Prop>isInRecycleBin</Prop>
+                  </Left>
+                  <Right>false</Right>
+                </BinaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>AncestorOfType_Page_16</Var>
+                        <Prop>name</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>ExcludePagesNamed</Var>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+      </Else>
+      <Comment text="Modify variable(paraID) --> set property(objectId)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>paraID</Var>
+            <Index>
+              <Var>i</Var>
+            </Index>
+          </Left>
+          <Right>
+            <Var>ParagraphObject_15</Var>
+            <Prop>objectId</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="If variable(multiWords) lte &quot;3&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name="&lt;=">
+            <Left>
+              <Var>multiWords</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(paraText) --> set property(text)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraText</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_15</Var>
+              <Prop>text</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_15</Var>
+              <Prop>hyperlink</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </If>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var>
+          </Left>
+          <Right>1</Right>
+        </BinaryOp>
+      </Expression>
+    </ForEach>
+    <Comment text="Modify variable(hints) --> set variable(i)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>hints</Var>
+        </Left>
+        <Right>
+          <Var>i</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="If variable(multiWords) gt &quot;3&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(j) --> set &quot;3&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="While variable(j) lt variable(multiWords)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(WordsRemain) --> set variable(multiWords)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(WordsRemain) --> sub variable(j)" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j1) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j1</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j2) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j2</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="If variable(WordsRemain) gte &quot;3&quot;" />
+        <If collapsed="true">
+          <Condition>
+            <BinaryOp name=">=">
+              <Left>
+                <Var>WordsRemain</Var>
+              </Left>
+              <Right>3</Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j1</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(j2) --> add &quot;2&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j2</Var>
+              </Left>
+              <Right>2</Right>
+            </BinaryOp>
+          </Expression>
+        </If>
+        <Else collapsed="true">
+          <Comment text="If variable(WordsRemain) eq &quot;2&quot;" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>WordsRemain</Var>
+                </Left>
+                <Right>2</Right>
+              </BinaryOp>
+            </Condition>
+            <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j1</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+          </If>
+        </Else>
+        <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>i</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="While variable(i) lt variable(hints)" />
+        <While>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>
+                <Var>hints</Var>
+              </Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="For first Paragraph in CurrentSection" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObjects_19</Var>
+              </Left>
+              <Right>
+                <Call name="QueryObjects">
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Call name="GetCurrentSection" />
+                  </Arg>
+                </Call>
+              </Right>
+            </BinaryOp>
+          </Expression>
+          <While>
+            <Condition>
+              <BinaryOp name=">">
+                <Left>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>ParagraphObjects_19</Var>
+                    </Arg>
+                  </Call>
+                </Left>
+                <Right>0</Right>
+              </BinaryOp>
+            </Condition>
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParagraphObject_17</Var>
+                </Left>
+                <Right>
+                  <Call name="Array_PopFront">
+                    <Arg>
+                      <Var>ParagraphObjects_19</Var>
+                    </Arg>
+                  </Call>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="==">
+                      <Left>
+                        <Var>ParagraphObject_17</Var>
+                        <Prop>objectId</Prop>
+                      </Left>
+                      <Right>
+                        <Var>paraID</Var>
+                        <Index>
+                          <Var>i</Var>
+                        </Index>
+                      </Right>
+                    </BinaryOp>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_17</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_17</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j1</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_17</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j2</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="GetAncestorOfType">
+                      <Arg>
+                        <Var>ParagraphObject_17</Var>
+                      </Arg>
+                      <Arg>Page</Arg>
+                      <Arg>
+                        <Var>AncestorOfType_Page_18</Var>
+                      </Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <Else>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <BinaryOp name="==">
+                        <Left>
+                          <Var>AncestorOfType_Page_18</Var>
+                          <Prop>isInRecycleBin</Prop>
+                        </Left>
+                        <Right>false</Right>
+                      </BinaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <UnaryOp name="!">
+                        <Operand>
+                          <Call name="String_Contains">
+                            <Arg>
+                              <Var>AncestorOfType_Page_18</Var>
+                              <Prop>name</Prop>
+                            </Arg>
+                            <Arg>
+                              <Var>ExcludePagesNamed</Var>
+                            </Arg>
+                            <Arg>true</Arg>
+                          </Call>
+                        </Operand>
+                      </UnaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+            </Else>
+            <Comment text="Modify variable(paraID) --> set property(objectId)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>paraID</Var>
+                  <Index>
+                    <Var>k</Var>
+                  </Index>
+                </Left>
+                <Right>
+                  <Var>ParagraphObject_17</Var>
+                  <Prop>objectId</Prop>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="If variable(WordsRemain) lte &quot;3&quot;" />
+            <If>
+              <Condition>
+                <BinaryOp name="&lt;=">
+                  <Left>
+                    <Var>WordsRemain</Var>
+                  </Left>
+                  <Right>3</Right>
+                </BinaryOp>
+              </Condition>
+              <Comment text="Modify variable(paraText) --> set property(text)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraText</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_17</Var>
+                    <Prop>text</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+              <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraLink</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_17</Var>
+                    <Prop>hyperlink</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+            </If>
+            <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>k</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+            <Break>1</Break>
+          </While>
+          <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+        </While>
+        <Comment text="Modify variable(j) --> add &quot;3&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(hints) --> set variable(k)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>hints</Var>
+            </Left>
+            <Right>
+              <Var>k</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </While>
+    </If>
+  </If>
+  <Comment text="If variable(scope) eq &quot;Current Notebook&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>scope</Var>
+        </Left>
+        <Right>Current Notebook</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="For each Paragraph in CurrentNotebook" />
+    <ForEach var="ParagraphObject_20">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetCurrentNotebook" />
+          </Arg>
+        </Call>
+      </Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_20</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>0</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_20</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>1</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_20</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>2</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="GetAncestorOfType">
+                <Arg>
+                  <Var>ParagraphObject_20</Var>
+                </Arg>
+                <Arg>Page</Arg>
+                <Arg>
+                  <Var>AncestorOfType_Page_21</Var>
+                </Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <Else>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>AncestorOfType_Page_21</Var>
+                    <Prop>isInRecycleBin</Prop>
+                  </Left>
+                  <Right>false</Right>
+                </BinaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>AncestorOfType_Page_21</Var>
+                        <Prop>name</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>ExcludePagesNamed</Var>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+      </Else>
+      <Comment text="Modify variable(paraID) --> set property(objectId)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>paraID</Var>
+            <Index>
+              <Var>i</Var>
+            </Index>
+          </Left>
+          <Right>
+            <Var>ParagraphObject_20</Var>
+            <Prop>objectId</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="If variable(multiWords) lte &quot;3&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name="&lt;=">
+            <Left>
+              <Var>multiWords</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(paraText) --> set property(text)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraText</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_20</Var>
+              <Prop>text</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_20</Var>
+              <Prop>hyperlink</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </If>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var>
+          </Left>
+          <Right>1</Right>
+        </BinaryOp>
+      </Expression>
+    </ForEach>
+    <Comment text="Modify variable(hints) --> set variable(i)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>hints</Var>
+        </Left>
+        <Right>
+          <Var>i</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="If variable(multiWords) gt &quot;3&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(j) --> set &quot;3&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="While variable(j) lt variable(multiWords)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(WordsRemain) --> set variable(multiWords)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(WordsRemain) --> sub variable(j)" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j1) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j1</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j2) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j2</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="If variable(WordsRemain) gte &quot;3&quot;" />
+        <If collapsed="true">
+          <Condition>
+            <BinaryOp name=">=">
+              <Left>
+                <Var>WordsRemain</Var>
+              </Left>
+              <Right>3</Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j1</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(j2) --> add &quot;2&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j2</Var>
+              </Left>
+              <Right>2</Right>
+            </BinaryOp>
+          </Expression>
+        </If>
+        <Else collapsed="true">
+          <Comment text="If variable(WordsRemain) eq &quot;2&quot;" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>WordsRemain</Var>
+                </Left>
+                <Right>2</Right>
+              </BinaryOp>
+            </Condition>
+            <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j1</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+          </If>
+        </Else>
+        <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>i</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="While variable(i) lt variable(hints)" />
+        <While>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>
+                <Var>hints</Var>
+              </Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="For first Paragraph in CurrentNotebook" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObjects_24</Var>
+              </Left>
+              <Right>
+                <Call name="QueryObjects">
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Call name="GetCurrentNotebook" />
+                  </Arg>
+                </Call>
+              </Right>
+            </BinaryOp>
+          </Expression>
+          <While>
+            <Condition>
+              <BinaryOp name=">">
+                <Left>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>ParagraphObjects_24</Var>
+                    </Arg>
+                  </Call>
+                </Left>
+                <Right>0</Right>
+              </BinaryOp>
+            </Condition>
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParagraphObject_22</Var>
+                </Left>
+                <Right>
+                  <Call name="Array_PopFront">
+                    <Arg>
+                      <Var>ParagraphObjects_24</Var>
+                    </Arg>
+                  </Call>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="==">
+                      <Left>
+                        <Var>ParagraphObject_22</Var>
+                        <Prop>objectId</Prop>
+                      </Left>
+                      <Right>
+                        <Var>paraID</Var>
+                        <Index>
+                          <Var>i</Var>
+                        </Index>
+                      </Right>
+                    </BinaryOp>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_22</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_22</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j1</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_22</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j2</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="GetAncestorOfType">
+                      <Arg>
+                        <Var>ParagraphObject_22</Var>
+                      </Arg>
+                      <Arg>Page</Arg>
+                      <Arg>
+                        <Var>AncestorOfType_Page_23</Var>
+                      </Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <Else>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <BinaryOp name="==">
+                        <Left>
+                          <Var>AncestorOfType_Page_23</Var>
+                          <Prop>isInRecycleBin</Prop>
+                        </Left>
+                        <Right>false</Right>
+                      </BinaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <UnaryOp name="!">
+                        <Operand>
+                          <Call name="String_Contains">
+                            <Arg>
+                              <Var>AncestorOfType_Page_23</Var>
+                              <Prop>name</Prop>
+                            </Arg>
+                            <Arg>
+                              <Var>ExcludePagesNamed</Var>
+                            </Arg>
+                            <Arg>true</Arg>
+                          </Call>
+                        </Operand>
+                      </UnaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+            </Else>
+            <Comment text="Modify variable(paraID) --> set property(objectId)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>paraID</Var>
+                  <Index>
+                    <Var>k</Var>
+                  </Index>
+                </Left>
+                <Right>
+                  <Var>ParagraphObject_22</Var>
+                  <Prop>objectId</Prop>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="If variable(WordsRemain) lte &quot;3&quot;" />
+            <If>
+              <Condition>
+                <BinaryOp name="&lt;=">
+                  <Left>
+                    <Var>WordsRemain</Var>
+                  </Left>
+                  <Right>3</Right>
+                </BinaryOp>
+              </Condition>
+              <Comment text="Modify variable(paraText) --> set property(text)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraText</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_22</Var>
+                    <Prop>text</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+              <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraLink</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_22</Var>
+                    <Prop>hyperlink</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+            </If>
+            <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>k</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+            <Break>1</Break>
+          </While>
+          <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+        </While>
+        <Comment text="Modify variable(j) --> add &quot;3&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(hints) --> set variable(k)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>hints</Var>
+            </Left>
+            <Right>
+              <Var>k</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </While>
+    </If>
+  </If>
+  <Comment text="If variable(scope) eq &quot;All Notebooks&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>scope</Var>
+        </Left>
+        <Right>All Notebooks</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="For each Paragraph in AllNotebooks" />
+    <ForEach var="ParagraphObject_25">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetNotebookRoot" />
+          </Arg>
+        </Call>
+      </Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_25</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>0</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_25</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>1</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="String_Contains">
+                <Arg>
+                  <Var>ParagraphObject_25</Var>
+                  <Prop>text</Prop>
+                </Arg>
+                <Arg>
+                  <Var>keywords</Var>
+                  <Index>2</Index>
+                </Arg>
+                <Arg>true</Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="GetAncestorOfType">
+                <Arg>
+                  <Var>ParagraphObject_25</Var>
+                </Arg>
+                <Arg>Page</Arg>
+                <Arg>
+                  <Var>AncestorOfType_Page_26</Var>
+                </Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <Else>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>AncestorOfType_Page_26</Var>
+                    <Prop>isInRecycleBin</Prop>
+                  </Left>
+                  <Right>false</Right>
+                </BinaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>AncestorOfType_Page_26</Var>
+                        <Prop>name</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>ExcludePagesNamed</Var>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+      </Else>
+      <Comment text="Modify variable(paraID) --> set property(objectId)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>paraID</Var>
+            <Index>
+              <Var>i</Var>
+            </Index>
+          </Left>
+          <Right>
+            <Var>ParagraphObject_25</Var>
+            <Prop>objectId</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="If variable(multiWords) lte &quot;3&quot;" />
+      <If collapsed="true">
+        <Condition>
+          <BinaryOp name="&lt;=">
+            <Left>
+              <Var>multiWords</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(paraText) --> set property(text)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraText</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_25</Var>
+              <Prop>text</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>i</Var>
+              </Index>
+            </Left>
+            <Right>
+              <Var>ParagraphObject_25</Var>
+              <Prop>hyperlink</Prop>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </If>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var>
+          </Left>
+          <Right>1</Right>
+        </BinaryOp>
+      </Expression>
+    </ForEach>
+    <Comment text="Modify variable(hints) --> set variable(i)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>hints</Var>
+        </Left>
+        <Right>
+          <Var>i</Var>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="If variable(multiWords) gt &quot;3&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Var>multiWords</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(j) --> set &quot;3&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var>
+          </Left>
+          <Right>3</Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="While variable(j) lt variable(multiWords)" />
+      <While collapsed="true">
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Modify variable(WordsRemain) --> set variable(multiWords)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>multiWords</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(WordsRemain) --> sub variable(j)" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>WordsRemain</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j1) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j1</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(j2) --> set variable(j)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>j2</Var>
+            </Left>
+            <Right>
+              <Var>j</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="If variable(WordsRemain) gte &quot;3&quot;" />
+        <If collapsed="true">
+          <Condition>
+            <BinaryOp name=">=">
+              <Left>
+                <Var>WordsRemain</Var>
+              </Left>
+              <Right>3</Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j1</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(j2) --> add &quot;2&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j2</Var>
+              </Left>
+              <Right>2</Right>
+            </BinaryOp>
+          </Expression>
+        </If>
+        <Else collapsed="true">
+          <Comment text="If variable(WordsRemain) eq &quot;2&quot;" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>WordsRemain</Var>
+                </Left>
+                <Right>2</Right>
+              </BinaryOp>
+            </Condition>
+            <Comment text="Modify variable(j1) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j1</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+          </If>
+        </Else>
+        <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>i</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>0</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="While variable(i) lt variable(hints)" />
+        <While collapsed="true">
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>
+                <Var>hints</Var>
+              </Right>
+            </BinaryOp>
+          </Condition>
+          <Comment text="For first Paragraph in AllNotebooks" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObjects_29</Var>
+              </Left>
+              <Right>
+                <Call name="QueryObjects">
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Call name="GetNotebookRoot" />
+                  </Arg>
+                </Call>
+              </Right>
+            </BinaryOp>
+          </Expression>
+          <While>
+            <Condition>
+              <BinaryOp name=">">
+                <Left>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>ParagraphObjects_29</Var>
+                    </Arg>
+                  </Call>
+                </Left>
+                <Right>0</Right>
+              </BinaryOp>
+            </Condition>
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParagraphObject_27</Var>
+                </Left>
+                <Right>
+                  <Call name="Array_PopFront">
+                    <Arg>
+                      <Var>ParagraphObjects_29</Var>
+                    </Arg>
+                  </Call>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="==">
+                      <Left>
+                        <Var>ParagraphObject_27</Var>
+                        <Prop>objectId</Prop>
+                      </Left>
+                      <Right>
+                        <Var>paraID</Var>
+                        <Index>
+                          <Var>i</Var>
+                        </Index>
+                      </Right>
+                    </BinaryOp>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_27</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_27</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j1</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="String_Contains">
+                      <Arg>
+                        <Var>ParagraphObject_27</Var>
+                        <Prop>text</Prop>
+                      </Arg>
+                      <Arg>
+                        <Var>keywords</Var>
+                        <Index>
+                          <Var>j2</Var>
+                        </Index>
+                      </Arg>
+                      <Arg>true</Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <Call name="GetAncestorOfType">
+                      <Arg>
+                        <Var>ParagraphObject_27</Var>
+                      </Arg>
+                      <Arg>Page</Arg>
+                      <Arg>
+                        <Var>AncestorOfType_Page_28</Var>
+                      </Arg>
+                    </Call>
+                  </Operand>
+                </UnaryOp>
+              </Condition>
+              <Continue>1</Continue>
+            </If>
+            <Else>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <BinaryOp name="==">
+                        <Left>
+                          <Var>AncestorOfType_Page_28</Var>
+                          <Prop>isInRecycleBin</Prop>
+                        </Left>
+                        <Right>false</Right>
+                      </BinaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <UnaryOp name="!">
+                        <Operand>
+                          <Call name="String_Contains">
+                            <Arg>
+                              <Var>AncestorOfType_Page_28</Var>
+                              <Prop>name</Prop>
+                            </Arg>
+                            <Arg>
+                              <Var>ExcludePagesNamed</Var>
+                            </Arg>
+                            <Arg>true</Arg>
+                          </Call>
+                        </Operand>
+                      </UnaryOp>
+                    </Operand>
+                  </UnaryOp>
+                </Condition>
+                <Continue>1</Continue>
+              </If>
+            </Else>
+            <Comment text="Modify variable(paraID) --> set property(objectId)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>paraID</Var>
+                  <Index>
+                    <Var>k</Var>
+                  </Index>
+                </Left>
+                <Right>
+                  <Var>ParagraphObject_27</Var>
+                  <Prop>objectId</Prop>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="If variable(WordsRemain) lte &quot;3&quot;" />
+            <If>
+              <Condition>
+                <BinaryOp name="&lt;=">
+                  <Left>
+                    <Var>WordsRemain</Var>
+                  </Left>
+                  <Right>3</Right>
+                </BinaryOp>
+              </Condition>
+              <Comment text="Modify variable(paraText) --> set property(text)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraText</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_27</Var>
+                    <Prop>text</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+              <Comment text="Modify variable(paraLink) --> set property(hyperlink)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>paraLink</Var>
+                    <Index>
+                      <Var>k</Var>
+                    </Index>
+                  </Left>
+                  <Right>
+                    <Var>ParagraphObject_27</Var>
+                    <Prop>hyperlink</Prop>
+                  </Right>
+                </BinaryOp>
+              </Expression>
+            </If>
+            <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>k</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+            <Break>1</Break>
+          </While>
+          <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>1</Right>
+            </BinaryOp>
+          </Expression>
+        </While>
+        <Comment text="Modify variable(j) --> add &quot;3&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var>
+            </Left>
+            <Right>3</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(hints) --> set variable(k)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>hints</Var>
+            </Left>
+            <Right>
+              <Var>k</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+      </While>
+    </If>
+  </If>
+  <Comment text="If variable(hints) gt &quot;0&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Var>hints</Var>
+        </Left>
+        <Right>0</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>k</Var>
+        </Left>
+        <Right>0</Right>
+      </BinaryOp>
+    </Expression>
+    <Comment text="For first Section in CurrentSection" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>SectionObjects_40</Var>
+        </Left>
+        <Right>
+          <Call name="QueryObjects">
+            <Arg>Section</Arg>
+            <Arg>
+              <Call name="GetCurrentSection" />
+            </Arg>
+          </Call>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <While>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Call name="Array_Length">
+              <Arg>
+                <Var>SectionObjects_40</Var>
+              </Arg>
+            </Call>
+          </Left>
+          <Right>0</Right>
+        </BinaryOp>
+      </Condition>
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>SectionObject_30</Var>
+          </Left>
+          <Right>
+            <Call name="Array_PopFront">
+              <Arg>
+                <Var>SectionObjects_40</Var>
+              </Arg>
+            </Call>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Insert Page at index 0" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_PageObject_31</Var>
+          </Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>SectionObject_30</Var>
+              </Arg>
+              <Arg>Page</Arg>
+              <Arg>0</Arg>
+            </Call>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Modify variable(pageID) --> set property(id)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>pageID</Var>
+          </Left>
+          <Right>
+            <Var>Inserted_PageObject_31</Var>
+            <Prop>id</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Insert Outline at index -1" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_OutlineObject_32</Var>
+          </Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>Inserted_PageObject_31</Var>
+              </Arg>
+              <Arg>Outline</Arg>
+              <Arg>-1</Arg>
+            </Call>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="While variable(k) lt variable(hints)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>
+              <Var>hints</Var>
+            </Right>
+          </BinaryOp>
+        </Condition>
+        <Comment text="Insert Paragraph at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_ParagraphObject_33</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_OutlineObject_32</Var>
+                </Arg>
+                <Arg>Paragraph</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Insert Text at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_34</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_ParagraphObject_33</Var>
+                </Arg>
+                <Arg>Text</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(index) --> set variable(k)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>index</Var>
+            </Left>
+            <Right>
+              <Var>k</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(index) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>index</Var>
+            </Left>
+            <Right>1</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> set variable(index)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_34</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>
+              <Var>index</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> add &quot;. &quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>Inserted_TextObject_34</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>. </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Insert Text at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_35</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_ParagraphObject_33</Var>
+                </Arg>
+                <Arg>Text</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> set &quot;Found in: &quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_35</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>Found in: </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Insert Text at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_ParagraphObject_33</Var>
+                </Arg>
+                <Arg>Text</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(tempLink) --> set variable(paraLink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>tempLink</Var>
+            </Left>
+            <Right>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>k</Var>
+              </Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="If variable(tempLink) contains &quot;%20&quot;" />
+        <If>
+          <Condition>
+            <Call name="String_Contains">
+              <Arg>
+                <Var>tempLink</Var>
+              </Arg>
+              <Arg>%20</Arg>
+              <Arg>false</Arg>
+            </Call>
+          </Condition>
+          <Comment text="Modify variable(tempLinkSplit) --> set String_Split(variable(tempLink), &quot;%20&quot;)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>tempLinkSplit</Var>
+              </Left>
+              <Right>
+                <Call name="String_Split">
+                  <Arg>
+                    <Var>tempLink</Var>
+                  </Arg>
+                  <Arg>%20</Arg>
+                </Call>
+              </Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(tempLink) --> set &quot;&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>tempLink</Var>
+              </Left>
+              <Right></Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>i</Var>
+              </Left>
+              <Right>0</Right>
+            </BinaryOp>
+          </Expression>
+          <Comment text="While variable(i) lt Array_Length(variable(tempLinkSplit))" />
+          <While>
+            <Condition>
+              <BinaryOp name="&lt;">
+                <Left>
+                  <Var>i</Var>
+                </Left>
+                <Right>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>tempLinkSplit</Var>
+                    </Arg>
+                  </Call>
+                </Right>
+              </BinaryOp>
+            </Condition>
+            <Comment text="Modify variable(tempLink) --> add variable(tempLinkSplit)" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>tempLink</Var>
+                </Left>
+                <Right>
+                  <Var>tempLinkSplit</Var>
+                  <Index>
+                    <Var>i</Var>
+                  </Index>
+                </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="Modify variable(tempLink) --> add &quot; &quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>tempLink</Var>
+                </Left>
+                <Right> </Right>
+              </BinaryOp>
+            </Expression>
+            <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>i</Var>
+                </Left>
+                <Right>1</Right>
+              </BinaryOp>
+            </Expression>
+          </While>
+        </If>
+        <Comment text="Modify variable(linkComp) --> set String_Split(variable(tempLink), &quot;.one#&quot;)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>linkComp</Var>
+            </Left>
+            <Right>
+              <Call name="String_Split">
+                <Arg>
+                  <Var>tempLink</Var>
+                </Arg>
+                <Arg>.one#</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(linkHead) --> set variable(linkComp)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>linkHead</Var>
+            </Left>
+            <Right>
+              <Var>linkComp</Var>
+              <Index>0</Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(whereComp1) --> set String_Split(variable(linkHead), &quot;/&quot;)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>whereComp1</Var>
+            </Left>
+            <Right>
+              <Call name="String_Split">
+                <Arg>
+                  <Var>linkHead</Var>
+                </Arg>
+                <Arg>/</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(nS) --> set Array_Length(variable(whereComp1))" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>nS</Var>
+            </Left>
+            <Right>
+              <Call name="Array_Length">
+                <Arg>
+                  <Var>whereComp1</Var>
+                </Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(nS) --> sub &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>nS</Var>
+            </Left>
+            <Right>1</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(whichSection) --> set variable(whereComp1)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>whichSection</Var>
+            </Left>
+            <Right>
+              <Var>whereComp1</Var>
+              <Index>
+                <Var>nS</Var>
+              </Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(nS) --> sub &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>nS</Var>
+            </Left>
+            <Right>1</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(whichNoteBook) --> set variable(whereComp1)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>whichNoteBook</Var>
+            </Left>
+            <Right>
+              <Var>whereComp1</Var>
+              <Index>
+                <Var>nS</Var>
+              </Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(linkTail) --> set String_Split(variable(linkComp), &quot;&amp;section-id=&quot;)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>linkTail</Var>
+            </Left>
+            <Right>
+              <Call name="String_Split">
+                <Arg>
+                  <Var>linkComp</Var>
+                  <Index>1</Index>
+                </Arg>
+                <Arg>&amp;section-id=</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(whichPage) --> set variable(linkTail)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>whichPage</Var>
+            </Left>
+            <Right>
+              <Var>linkTail</Var>
+              <Index>0</Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> set variable(whichNoteBook)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>
+              <Var>whichNoteBook</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> add &quot; > &quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right> &gt; </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> add variable(whichSection)" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>
+              <Var>whichSection</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> add &quot; > &quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right> &gt; </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> add variable(whichPage)" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>
+              <Var>whichPage</Var>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(hyperlink) --> set variable(paraLink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_36</Var>
+              <Prop>hyperlink</Prop>
+            </Left>
+            <Right>
+              <Var>paraLink</Var>
+              <Index>
+                <Var>k</Var>
+              </Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(fontSize) --> set &quot;10&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_ParagraphObject_33</Var>
+              <Prop>fontSize</Prop>
+            </Left>
+            <Right>10</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(fontColor) --> set &quot;gray&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_ParagraphObject_33</Var>
+              <Prop>fontColor</Prop>
+            </Left>
+            <Right>gray</Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Insert Paragraph at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_ParagraphObject_37</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_OutlineObject_32</Var>
+                </Arg>
+                <Arg>Paragraph</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Insert Text at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_38</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_ParagraphObject_37</Var>
+                </Arg>
+                <Arg>Text</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify property(value) --> set variable(paraText)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_38</Var>
+              <Prop>value</Prop>
+            </Left>
+            <Right>
+              <Var>paraText</Var>
+              <Index>
+                <Var>k</Var>
+              </Index>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Insert Paragraph at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_ParagraphObject_39</Var>
+            </Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_OutlineObject_32</Var>
+                </Arg>
+                <Arg>Paragraph</Arg>
+                <Arg>-1</Arg>
+              </Call>
+            </Right>
+          </BinaryOp>
+        </Expression>
+        <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>k</Var>
+            </Left>
+            <Right>1</Right>
+          </BinaryOp>
+        </Expression>
+      </While>
+      <Comment text="Modify property(color) --> set &quot;#ffeeee&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_PageObject_31</Var>
+            <Prop>color</Prop>
+          </Left>
+          <Right>#ffeeee</Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Modify variable(newpageID) --> set property(id)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>newpageID</Var>
+          </Left>
+          <Right>
+            <Var>Inserted_PageObject_31</Var>
+            <Prop>id</Prop>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Break>1</Break>
+    </While>
+    <Comment text="For first Paragraph in CurrentSection" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>ParagraphObjects_43</Var>
+        </Left>
+        <Right>
+          <Call name="QueryObjects">
+            <Arg>Paragraph</Arg>
+            <Arg>
+              <Call name="GetCurrentSection" />
+            </Arg>
+          </Call>
+        </Right>
+      </BinaryOp>
+    </Expression>
+    <While>
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Call name="Array_Length">
+              <Arg>
+                <Var>ParagraphObjects_43</Var>
+              </Arg>
+            </Call>
+          </Left>
+          <Right>0</Right>
+        </BinaryOp>
+      </Condition>
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>ParagraphObject_41</Var>
+          </Left>
+          <Right>
+            <Call name="Array_PopFront">
+              <Arg>
+                <Var>ParagraphObjects_43</Var>
+              </Arg>
+            </Call>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <Call name="GetAncestorOfType">
+                <Arg>
+                  <Var>ParagraphObject_41</Var>
+                </Arg>
+                <Arg>Page</Arg>
+                <Arg>
+                  <Var>AncestorOfType_Page_42</Var>
+                </Arg>
+              </Call>
+            </Operand>
+          </UnaryOp>
+        </Condition>
+        <Continue>1</Continue>
+      </If>
+      <Else>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>AncestorOfType_Page_42</Var>
+                    <Prop>id</Prop>
+                  </Left>
+                  <Right>
+                    <Var>pageID</Var>
+                  </Right>
+                </BinaryOp>
+              </Operand>
+            </UnaryOp>
+          </Condition>
+          <Continue>1</Continue>
+        </If>
+      </Else>
+      <Comment text="Modify property(text) --> set &quot;Search Results of: &quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>ParagraphObject_41</Var>
+            <Prop>text</Prop>
+          </Left>
+          <Right>Search Results of: </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Modify property(text) --> add variable(search)" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>ParagraphObject_41</Var>
+            <Prop>text</Prop>
+          </Left>
+          <Right>
+            <Var>search</Var>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Modify property(text) --> add &quot; in &quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>ParagraphObject_41</Var>
+            <Prop>text</Prop>
+          </Left>
+          <Right> in </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="Modify property(text) --> add variable(scope)" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>ParagraphObject_41</Var>
+            <Prop>text</Prop>
+          </Left>
+          <Right>
+            <Var>scope</Var>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Break>1</Break>
+    </While>
+  </If>
+  <Comment text="Modify variable(msg) --> set variable(hints)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>msg</Var>
+      </Left>
+      <Right>
+        <Var>hints</Var>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(msg) --> add &quot; instances of {&quot;" />
+  <Expression>
+    <BinaryOp name="+=">
+      <Left>
+        <Var>msg</Var>
+      </Left>
+      <Right> instances of {</Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(msg) --> add variable(search)" />
+  <Expression>
+    <BinaryOp name="+=">
+      <Left>
+        <Var>msg</Var>
+      </Left>
+      <Right>
+        <Var>search</Var>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(msg) --> add &quot;} are found.&quot;" />
+  <Expression>
+    <BinaryOp name="+=">
+      <Left>
+        <Var>msg</Var>
+      </Left>
+      <Right>} are found.</Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(msg) --> set prompt(variable(msg))" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>dialog_box</Var>
+      </Left>
+      <Right>
+        <Call name="DialogBox_Create">
+          <Arg></Arg>
+        </Call>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_AddLabel">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+      <Arg>
+        <Var>msg</Var>
+      </Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <Call name="DialogBox_Show">
+      <Arg>
+        <Var>dialog_box</Var>
+      </Arg>
+    </Call>
+  </Expression>
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>msg</Var>
+      </Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_44</Index>
+      </Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="Modify variable(k) --> set &quot;0&quot;" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>k</Var>
+      </Left>
+      <Right>0</Right>
+    </BinaryOp>
+  </Expression>
+  <Comment text="If variable(highlightkwords) eq &quot;true&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>highlightkwords</Var>
+        </Left>
+        <Right>true</Right>
+      </BinaryOp>
+    </Condition>
+    <Comment text="While variable(k) lt variable(multiWords)" />
+    <While>
+      <Condition>
+        <BinaryOp name="&lt;">
+          <Left>
+            <Var>k</Var>
+          </Left>
+          <Right>
+            <Var>multiWords</Var>
+          </Right>
+        </BinaryOp>
+      </Condition>
+      <Comment text="Modify variable(highlightkwords) --> set variable(keywords)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>highlightkwords</Var>
+          </Left>
+          <Right>
+            <Var>keywords</Var>
+            <Index>
+              <Var>k</Var>
+            </Index>
+          </Right>
+        </BinaryOp>
+      </Expression>
+      <Comment text="For each Text in CurrentPage" />
+      <ForEach var="TextObject_45">
+        <Array>
+          <Call name="QueryText">
+            <Arg>
+              <Call name="GetCurrentPage" />
+            </Arg>
+            <Arg>
+              <Var>highlightkwords</Var>
+            </Arg>
+            <Arg>true</Arg>
+          </Call>
+        </Array>
+        <Comment text="Modify property(highlightColor) --> set &quot;pink&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>TextObject_45</Var>
+              <Prop>highlightColor</Prop>
+            </Left>
+            <Right>pink</Right>
+          </BinaryOp>
+        </Expression>
+      </ForEach>
+      <Comment text="Modify variable(k) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>k</Var>
+          </Left>
+          <Right>1</Right>
+        </BinaryOp>
+      </Expression>
+    </While>
+  </If>
 </Macro>
