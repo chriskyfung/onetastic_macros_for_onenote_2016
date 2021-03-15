@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-07-22 -->
+<Macro id="MC607E847CD2744239E66BF43A1BA1EB7" name="Expand/Collapse Outlines" category="Outlining" description="Toggle Expand/Collapse, or expand to the selected outlines to the chosen level (Level 1 to 9 as well as all levels)." version="7">
+  <ModifyVar name="ExpandLevel" op="set">
+    <Prompt type="dropdown" initialValue="Toggle selected" values="Toggle selected;1;2;3;4;5;6;7;8;9;All">Level</Prompt>
+  </ModifyVar>
+  <ModifyVar name="msg" op="set">
+    <Prompt type="message" initialValue="" values="">* Collapse = 1</Prompt>
+  </ModifyVar>
+  <ModifyVar name="msg" op="set">
+    <Prompt type="message" initialValue="" values="">or use default shortcut key ALT+SHIFT+ [1-0]</Prompt>
+  </ModifyVar>
+  <For each="Text" collapsed="true">
+    <That hasProp="selected" op="eq" value="true" />
+    <ModifyProp name="selected" op="set" value="false" />
+  </For>
+  <IfVar name="ExpandLevel" op="not" value="Toggle">
+    <IsRootOp />
+    <IfVar name="ExpandLevel" op="eq" value="1">
+      <IsRootOp />
+      <For each="Paragraph">
+        <That hasProp="selection" op="not" value="none" />
+        <ModifyProp name="collapsed" op="set" value="true" />
+      </For>
+      <Else>
+        <IsRootOp />
+        <For each="Paragraph">
+          <That hasProp="selection" op="not" value="none" />
+          <ModifyProp name="collapsed" op="set" value="false" />
+        </For>
+        <For each="Paragraph">
+          <Under a="Paragraph">
+            <That hasProp="selection" op="not" value="none" />
+          </Under>
+          <ModifyProp name="collapsed" op="set" value="false" />
+          <ModifyProp name="selection" op="set" value="partial" />
+        </For>
+        <IfVar name="ExpandLevel" op="not" value="All">
+          <IsRootOp />
+          <ModifyVar name="Count" op="set" value="0" />
+          <For each="Paragraph">
+            <That hasProp="selection" op="not" value="none" />
+            <Under a="Paragraph" />
+            <ModifyProp name="collapsed" op="set" value="true" />
+            <ModifyProp name="selection" op="set" value="none" />
+          </For>
+          <For each="Paragraph" collapsed="true">
+            <That hasProp="selection" op="not" value="none" />
+            <ModifyVar name="TopParaID" op="set" prop="objectId">
+              <LeftIndex var="Count" />
+            </ModifyVar>
+            <ModifyVar name="Count" op="add" value="1" />
+          </For>
+          <ModifyVar name="LevelCount" op="set" value="2" />
+          <WhileVar name="LevelCount" op="lt" var="ExpandLevel">
+            <IsRootOp />
+            <ModifyVar name="Count" op="set" value="0" />
+            <ModifyVar name="newCount" op="set" value="0" />
+            <WhileVar name="Count" op="lt">
+              <Function name="Array_Length">
+                <Param name="array" var="TopParaID" />
+              </Function>
+              <IsRootOp />
+              <For each="Paragraph">
+                <Under directly="true" a="Paragraph">
+                  <That hasProp="objectId" op="eq" var="TopParaID">
+                    <RightIndex var="Count" />
+                  </That>
+                </Under>
+                <ModifyProp name="collapsed" op="set" value="false" />
+                <ModifyVar name="NewParaID" op="set" prop="objectId">
+                  <LeftIndex var="newCount" />
+                </ModifyVar>
+                <ModifyVar name="newCount" op="add" value="1" />
+              </For>
+              <ModifyVar name="Count" op="add" value="1" />
+            </WhileVar>
+            <ModifyVar name="LevelCount" op="add" value="1" />
+            <ModifyVar name="TopParaID" op="set" var="NewParaID" />
+          </WhileVar>
+        </IfVar>
+      </Else>
+    </IfVar>
+    <Else collapsed="true">
+      <IsRootOp />
+      <For each="Paragraph">
+        <That hasProp="selection" op="not" value="none" />
+        <ModifyVar name="status" op="set" prop="collapsed" />
+        <IfVar name="status" op="eq" value="true">
+          <ModifyProp name="collapsed" op="set" value="false" />
+          <Else>
+            <ModifyProp name="collapsed" op="set" value="true" />
+          </Else>
+        </IfVar>
+      </For>
+    </Else>
+  </IfVar>
+</Macro>
