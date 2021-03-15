@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-05-09 -->
-<Macro id="MA61FBC5536CB4FB4B3FDABDDA29C31DC" name="Column Widths Plus" category="Table" description="Sets the width of selected or all column(s) the selected table on the current page to the specified value." version="6">
-  <ModifyVar name="IsSelectOnly" op="set" value="0" />
+<!-- Published on 2014-06-06 -->
+<Macro id="MA61FBC5536CB4FB4B3FDABDDA29C31DC" name="Column Widths+" category="Table" description="Sets the width of selected or all column(s) the selected table on the current page to the specified value." version="7">
+  <ModifyVar name="ColumnWidth" op="set">
+    <Prompt type="text" initialValue="95" values="">&amp;Specify column width</Prompt>
+  </ModifyVar>
+  <ModifyVar name="IsSelectOnly" op="set">
+    <Prompt type="checkbox" initialValue="All" values="All;Selected Only">&amp;ONLY Selected column(s) ?</Prompt>
+  </ModifyVar>
+  <ModifyVar name="COLUMNWIDTH" op="set" var="ColumnWidth" />
+  <ModifyVar name="HasSelectedTable" op="set" value="0" />
   <For first="Table">
     <That hasProp="selection" op="not" value="none" />
-    <ModifyVar name="IsSelectOnly" op="set">
-      <Prompt type="dropdown" initialValue="All" values="All;Selected Only">Do you want to modify the ALL or ONLY Selected column(s) ?</Prompt>
-    </ModifyVar>
+    <ModifyVar name="HasSelectedTable" op="set" value="1" />
   </For>
-  <IfVar name="IsSelectOnly" op="eq" value="0">
+  <IfVar name="HasSelectedTable" op="eq" value="0">
     <IsRootOp />
     <ModifyVar name="IsSelectOnly" op="set">
       <Prompt type="message" initialValue="" values="">No table has been selected!</Prompt>
     </ModifyVar>
     <Else>
       <IsRootOp />
-      <IfVar name="IsSelectOnly" op="eq" value="All">
+      <IfVar name="IsSelectOnly" op="not" value="true">
         <IsRootOp />
-        <ModifyVar name="ColumnWidth" op="set">
-          <Prompt type="text" initialValue="95" values="">Specify column width</Prompt>
-        </ModifyVar>
         <For each="Column">
           <Under a="Table">
             <That hasProp="selection" op="not" value="none" />
@@ -29,9 +31,6 @@
         </For>
         <Else>
           <IsRootOp />
-          <ModifyVar name="COLUMNWIDTH" op="set">
-            <Prompt type="text" initialValue="100" values="">For the selected table, the width of ALL columns will be:</Prompt>
-          </ModifyVar>
           <ModifyVar name="i" op="set" value="0" />
           <For each="Cell">
             <That hasProp="selection" op="eq" value="partial" />
