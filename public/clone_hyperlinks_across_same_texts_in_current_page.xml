@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-11-06 -->
+<Macro id="M8940E16FF6B14449B186A1D0F31308A0" name="Clone Hyperlinks Across Same Texts in Current Page" category="Hyberlink" description="Find each text with hyperlinks, and then clone the hyperlink to the same texts in Current Page" version="8">
+  <ModifyVar name="i" op="set" value="0" />
+  <For each="Text">
+    <That hasProp="hyperlink" op="not" value="" />
+    <ModifyVar name="j" op="set" value="0" />
+    <WhileVar name="j" op="lt" var="i">
+      <IfProp name="hyperlink" op="eq" var="link">
+        <RightIndex var="j" />
+        <ModifyVar name="j" op="add" var="i" />
+        <ModifyVar name="j" op="add" value="2" />
+        <Else>
+          <ModifyVar name="j" op="add" value="1" />
+        </Else>
+      </IfProp>
+    </WhileVar>
+    <IfVar name="j" op="eq" var="i">
+      <ModifyVar name="text" op="set" prop="value">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="link" op="set" prop="hyperlink">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </IfVar>
+  </For>
+  <ModifyVar name="N" op="set" var="i" />
+  <IfVar name="N" op="gt" value="0">
+    <IsRootOp />
+    <ModifyVar name="i" op="set" value="0" />
+    <ModifyVar name="n" op="set" value="0" />
+    <WhileVar name="i" op="lt" var="N">
+      <IsRootOp />
+      <ModifyVar name="nClones" op="set" value="0">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <For each="Text">
+        <That hasProp="value" op="eq" var="text">
+          <RightIndex var="i" />
+        </That>
+        <That hasProp="hyperlink" op="eq" value="" />
+        <ModifyProp name="hyperlink" op="set" var="link">
+          <RightIndex var="i" />
+        </ModifyProp>
+        <ModifyVar name="nClones" op="add" value="1">
+          <LeftIndex var="i" />
+        </ModifyVar>
+      </For>
+      <ModifyVar name="i" op="add" value="1" />
+      <IfVar name="nClones" op="gt" value="0">
+        <LeftIndex var="i" />
+        <IsRootOp />
+        <ModifyVar name="n" op="add" value="1" />
+      </IfVar>
+    </WhileVar>
+    <ModifyVar name="Stat" op="set">
+      <Function name="Array_Join">
+        <Param name="array" var="nClones" />
+        <Param name="glue" value="   " />
+      </Function>
+    </ModifyVar>
+    <ModifyVar name="msg" op="set">
+      <Prompt type="message" initialValue="" values="" var="N"></Prompt>
+    </ModifyVar>
+    <ModifyVar name="msg" op="set">
+      <Prompt type="message" initialValue="" values="">unique hyperkinks (N)</Prompt>
+    </ModifyVar>
+    <ModifyVar name="msg" op="set">
+      <Prompt type="message" initialValue="" values="" var="n"></Prompt>
+    </ModifyVar>
+    <ModifyVar name="msg" op="set">
+      <Prompt type="message" initialValue="" values="">of N cloned</Prompt>
+    </ModifyVar>
+    <ModifyVar name="msg" op="set">
+      <Prompt type="message" initialValue="" values="" var="Stat"></Prompt>
+    </ModifyVar>
+    <ModifyVar name="msg" op="set">
+      <Prompt type="message" initialValue="" values="">No. of clones per link</Prompt>
+    </ModifyVar>
+    <Else>
+      <IsRootOp />
+      <ModifyVar name="Stat" op="set">
+        <Prompt type="message" initialValue="" values="">No Hyperlink in Current Page</Prompt>
+      </ModifyVar>
+    </Else>
+  </IfVar>
+</Macro>
