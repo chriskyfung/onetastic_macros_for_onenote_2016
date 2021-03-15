@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-07-30 -->
+<Macro id="M476EC47E319E4074AEF49CE79DBAC0EC" name="Search Multi-Keywords" category="Find" description="Search the paragraphs containing all the multiple keywords within a scope, and create a new page reporting the search results in the current section. Use semicolons (;) to separate the keywords, e.g. keyword1;keyword2;keyword3. There is (theoretically) no limit to the maximum number of keywords. But the speed is optimized for searching three keywords, and it slows down when more than three keywords are used. There are five opinions of scopes available, namely, “Current Page”, “Selection”, “Current Selection”, “Current Notebook”, and “All Notebooks”. It can take a long time, if search in notebook(s). Skip function is available, that is mainly for excluding pages that contain the previous search reports, to avoid duplicating the search results. Skip can take place in all scopes except the “Current Page” opinion. Change the texts as if you desired. It will skip the pages if their names contain the defined string. The report page lists the matched paragraphs and where they are found in." version="7">
+  <ModifyVar name="i" op="set" value="0" />
+  <ModifyVar name="search" op="set">
+    <Prompt type="text" initialValue="text1;text2;text3" values="">&amp;Find what</Prompt>
+  </ModifyVar>
+  <ModifyVar name="msg" op="set">
+    <Prompt type="message" initialValue="" values="">(use ; to separate multiple keywords)</Prompt>
+  </ModifyVar>
+  <ModifyVar name="scope" op="set">
+    <Prompt type="dropdown" initialValue="Current Page" values="Current Page;Selection;Current Section;Current Notebook;All Notebooks">&amp;Scope</Prompt>
+  </ModifyVar>
+  <ModifyVar name="ExcludePagesNamed" op="set">
+    <Prompt type="text" initialValue="Search Results of" values="" emptyOK="true">E&amp;xclude pages</Prompt>
+  </ModifyVar>
+  <ModifyVar name="isSkipPages" op="set">
+    <Prompt type="checkbox" initialValue="" values="">S&amp;kip pages named with the above texts</Prompt>
+  </ModifyVar>
+  <ModifyVar name="highlightkwords" op="set">
+    <Prompt type="checkbox" initialValue="" values="">Highlight</Prompt>
+  </ModifyVar>
+  <IfVar name="isSkipPages" op="not" value="true">
+    <IsRootOp />
+    <ModifyVar name="ExcludePagesNamed" op="set" value="" />
+  </IfVar>
+  <IfVar name="search" op="contains" value=";" collapsed="true">
+    <IsRootOp />
+    <ModifyVar name="keywords" op="set">
+      <Function name="String_Split">
+        <Param name="string" var="search" />
+        <Param name="delimiter" value=";" />
+      </Function>
+    </ModifyVar>
+    <ModifyVar name="multiWords" op="set">
+      <Function name="Array_Length">
+        <Param name="array" var="keywords" />
+      </Function>
+    </ModifyVar>
+    <IfVar name="multiWords" op="lt" value="3">
+      <IsRootOp />
+      <ModifyVar name="keywords" op="set" var="keywords">
+        <LeftIndex value="2" />
+        <RightIndex value="0" />
+      </ModifyVar>
+      <ModifyVar name="multiWords" op="set" value="2" />
+    </IfVar>
+    <Else>
+      <IsRootOp />
+      <ModifyVar name="keywords" op="set" var="search">
+        <LeftIndex value="0" />
+      </ModifyVar>
+      <ModifyVar name="keywords" op="set" var="search">
+        <LeftIndex value="1" />
+      </ModifyVar>
+      <ModifyVar name="keywords" op="set" var="search">
+        <LeftIndex value="2" />
+      </ModifyVar>
+      <ModifyVar name="multiWords" op="set" value="1" />
+    </Else>
+  </IfVar>
+  <IfVar name="scope" op="eq" value="Current Page" collapsed="true">
+    <IsRootOp />
+    <For each="Paragraph">
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="0" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="1" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="2" />
+      </That>
+      <ModifyVar name="paraID" op="set" prop="objectId">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <IfVar name="multiWords" op="lte" value="3">
+        <ModifyVar name="paraText" op="set" prop="text">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="paraLink" op="set" prop="hyperlink">
+          <LeftIndex var="i" />
+        </ModifyVar>
+      </IfVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </For>
+    <ModifyVar name="hints" op="set" var="i" />
+    <IfVar name="multiWords" op="gt" value="3">
+      <IsRootOp />
+      <ModifyVar name="j" op="set" value="3" />
+      <WhileVar name="j" op="lt" var="multiWords">
+        <IsRootOp />
+        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
+        <ModifyVar name="WordsRemain" op="sub" var="j" />
+        <ModifyVar name="j1" op="set" var="j" />
+        <ModifyVar name="j2" op="set" var="j" />
+        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
+          <IsRootOp />
+          <ModifyVar name="j1" op="add" value="1" />
+          <ModifyVar name="j2" op="add" value="2" />
+          <Else collapsed="true">
+            <IsRootOp />
+            <IfVar name="WordsRemain" op="eq" value="2">
+              <IsRootOp />
+              <ModifyVar name="j1" op="add" value="1" />
+            </IfVar>
+          </Else>
+        </IfVar>
+        <ModifyVar name="i" op="set" value="0" />
+        <ModifyVar name="k" op="set" value="0" />
+        <WhileVar name="i" op="lt" var="hints">
+          <IsRootOp />
+          <For first="Paragraph">
+            <That hasProp="objectId" op="eq" var="paraID">
+              <RightIndex var="i" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j1" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j2" />
+            </That>
+            <ModifyVar name="paraID" op="set" prop="objectId">
+              <LeftIndex var="k" />
+            </ModifyVar>
+            <IfVar name="WordsRemain" op="lte" value="3">
+              <ModifyVar name="paraText" op="set" prop="text">
+                <LeftIndex var="k" />
+              </ModifyVar>
+              <ModifyVar name="paraLink" op="set" prop="hyperlink">
+                <LeftIndex var="k" />
+              </ModifyVar>
+            </IfVar>
+            <ModifyVar name="k" op="add" value="1" />
+          </For>
+          <ModifyVar name="i" op="add" value="1" />
+        </WhileVar>
+        <ModifyVar name="j" op="add" value="3" />
+        <ModifyVar name="hints" op="set" var="k" />
+      </WhileVar>
+    </IfVar>
+  </IfVar>
+  <IfVar name="scope" op="eq" value="Selection" collapsed="true">
+    <IsRootOp />
+    <For each="Paragraph" in="CurrentSection">
+      <That hasProp="selection" op="not" value="none" />
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="0" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="1" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="2" />
+      </That>
+      <Under a="Page">
+        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+        <That hasProp="selection" op="not" value="none" />
+        <That hasProp="isInRecycleBin" op="eq" value="false" />
+      </Under>
+      <ModifyVar name="paraID" op="set" prop="objectId">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <IfVar name="multiWords" op="lte" value="3" collapsed="true">
+        <ModifyVar name="paraText" op="set" prop="text">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="paraLink" op="set" prop="hyperlink">
+          <LeftIndex var="i" />
+        </ModifyVar>
+      </IfVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </For>
+    <ModifyVar name="hints" op="set" var="i" />
+    <IfVar name="multiWords" op="gt" value="3">
+      <IsRootOp />
+      <ModifyVar name="j" op="set" value="3" />
+      <WhileVar name="j" op="lt" var="multiWords">
+        <IsRootOp />
+        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
+        <ModifyVar name="WordsRemain" op="sub" var="j" />
+        <ModifyVar name="j1" op="set" var="j" />
+        <ModifyVar name="j2" op="set" var="j" />
+        <IfVar name="WordsRemain" op="gte" value="3">
+          <IsRootOp />
+          <ModifyVar name="j1" op="add" value="1" />
+          <ModifyVar name="j2" op="add" value="2" />
+          <Else collapsed="true">
+            <IsRootOp />
+            <IfVar name="WordsRemain" op="eq" value="2">
+              <IsRootOp />
+              <ModifyVar name="j1" op="add" value="1" />
+            </IfVar>
+          </Else>
+        </IfVar>
+        <ModifyVar name="i" op="set" value="0" />
+        <ModifyVar name="k" op="set" value="0" />
+        <WhileVar name="i" op="lt" var="hints">
+          <IsRootOp />
+          <For first="Paragraph" in="CurrentSection">
+            <That hasProp="selection" op="not" value="none" />
+            <That hasProp="objectId" op="eq" var="paraID">
+              <RightIndex var="i" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j1" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j2" />
+            </That>
+            <Under a="Page">
+              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+              <That hasProp="selection" op="not" value="none" />
+              <That hasProp="isInRecycleBin" op="eq" value="false" />
+            </Under>
+            <ModifyVar name="paraID" op="set" prop="objectId">
+              <LeftIndex var="k" />
+            </ModifyVar>
+            <IfVar name="WordsRemain" op="lte" value="3">
+              <ModifyVar name="paraText" op="set" prop="text">
+                <LeftIndex var="k" />
+              </ModifyVar>
+              <ModifyVar name="paraLink" op="set" prop="hyperlink">
+                <LeftIndex var="k" />
+              </ModifyVar>
+            </IfVar>
+            <ModifyVar name="k" op="add" value="1" />
+          </For>
+          <ModifyVar name="i" op="add" value="1" />
+        </WhileVar>
+        <ModifyVar name="j" op="add" value="3" />
+        <ModifyVar name="hints" op="set" var="k" />
+      </WhileVar>
+    </IfVar>
+  </IfVar>
+  <IfVar name="scope" op="eq" value="Current Section" collapsed="true">
+    <IsRootOp />
+    <For each="Paragraph" in="CurrentSection">
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="0" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="1" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="2" />
+      </That>
+      <Under a="Page">
+        <That hasProp="isInRecycleBin" op="eq" value="false" />
+        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+      </Under>
+      <ModifyVar name="paraID" op="set" prop="objectId">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <IfVar name="multiWords" op="lte" value="3">
+        <ModifyVar name="paraText" op="set" prop="text">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="paraLink" op="set" prop="hyperlink">
+          <LeftIndex var="i" />
+        </ModifyVar>
+      </IfVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </For>
+    <ModifyVar name="hints" op="set" var="i" />
+    <IfVar name="multiWords" op="gt" value="3">
+      <IsRootOp />
+      <ModifyVar name="j" op="set" value="3" />
+      <WhileVar name="j" op="lt" var="multiWords">
+        <IsRootOp />
+        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
+        <ModifyVar name="WordsRemain" op="sub" var="j" />
+        <ModifyVar name="j1" op="set" var="j" />
+        <ModifyVar name="j2" op="set" var="j" />
+        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
+          <IsRootOp />
+          <ModifyVar name="j1" op="add" value="1" />
+          <ModifyVar name="j2" op="add" value="2" />
+          <Else collapsed="true">
+            <IsRootOp />
+            <IfVar name="WordsRemain" op="eq" value="2">
+              <IsRootOp />
+              <ModifyVar name="j1" op="add" value="1" />
+            </IfVar>
+          </Else>
+        </IfVar>
+        <ModifyVar name="i" op="set" value="0" />
+        <ModifyVar name="k" op="set" value="0" />
+        <WhileVar name="i" op="lt" var="hints">
+          <IsRootOp />
+          <For first="Paragraph" in="CurrentSection">
+            <That hasProp="objectId" op="eq" var="paraID">
+              <RightIndex var="i" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j1" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j2" />
+            </That>
+            <Under a="Page">
+              <That hasProp="isInRecycleBin" op="eq" value="false" />
+              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+            </Under>
+            <ModifyVar name="paraID" op="set" prop="objectId">
+              <LeftIndex var="k" />
+            </ModifyVar>
+            <IfVar name="WordsRemain" op="lte" value="3">
+              <ModifyVar name="paraText" op="set" prop="text">
+                <LeftIndex var="k" />
+              </ModifyVar>
+              <ModifyVar name="paraLink" op="set" prop="hyperlink">
+                <LeftIndex var="k" />
+              </ModifyVar>
+            </IfVar>
+            <ModifyVar name="k" op="add" value="1" />
+          </For>
+          <ModifyVar name="i" op="add" value="1" />
+        </WhileVar>
+        <ModifyVar name="j" op="add" value="3" />
+        <ModifyVar name="hints" op="set" var="k" />
+      </WhileVar>
+    </IfVar>
+  </IfVar>
+  <IfVar name="scope" op="eq" value="Current Notebook" collapsed="true">
+    <IsRootOp />
+    <For each="Paragraph" in="CurrentNotebook">
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="0" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="1" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="2" />
+      </That>
+      <Under a="Page">
+        <That hasProp="isInRecycleBin" op="eq" value="false" />
+        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+      </Under>
+      <ModifyVar name="paraID" op="set" prop="objectId">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <IfVar name="multiWords" op="lte" value="3">
+        <ModifyVar name="paraText" op="set" prop="text">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="paraLink" op="set" prop="hyperlink">
+          <LeftIndex var="i" />
+        </ModifyVar>
+      </IfVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </For>
+    <ModifyVar name="hints" op="set" var="i" />
+    <IfVar name="multiWords" op="gt" value="3">
+      <IsRootOp />
+      <ModifyVar name="j" op="set" value="3" />
+      <WhileVar name="j" op="lt" var="multiWords">
+        <IsRootOp />
+        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
+        <ModifyVar name="WordsRemain" op="sub" var="j" />
+        <ModifyVar name="j1" op="set" var="j" />
+        <ModifyVar name="j2" op="set" var="j" />
+        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
+          <IsRootOp />
+          <ModifyVar name="j1" op="add" value="1" />
+          <ModifyVar name="j2" op="add" value="2" />
+          <Else collapsed="true">
+            <IsRootOp />
+            <IfVar name="WordsRemain" op="eq" value="2">
+              <IsRootOp />
+              <ModifyVar name="j1" op="add" value="1" />
+            </IfVar>
+          </Else>
+        </IfVar>
+        <ModifyVar name="i" op="set" value="0" />
+        <ModifyVar name="k" op="set" value="0" />
+        <WhileVar name="i" op="lt" var="hints">
+          <IsRootOp />
+          <For first="Paragraph" in="CurrentNotebook">
+            <That hasProp="objectId" op="eq" var="paraID">
+              <RightIndex var="i" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j1" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j2" />
+            </That>
+            <Under a="Page">
+              <That hasProp="isInRecycleBin" op="eq" value="false" />
+              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+            </Under>
+            <ModifyVar name="paraID" op="set" prop="objectId">
+              <LeftIndex var="k" />
+            </ModifyVar>
+            <IfVar name="WordsRemain" op="lte" value="3">
+              <ModifyVar name="paraText" op="set" prop="text">
+                <LeftIndex var="k" />
+              </ModifyVar>
+              <ModifyVar name="paraLink" op="set" prop="hyperlink">
+                <LeftIndex var="k" />
+              </ModifyVar>
+            </IfVar>
+            <ModifyVar name="k" op="add" value="1" />
+          </For>
+          <ModifyVar name="i" op="add" value="1" />
+        </WhileVar>
+        <ModifyVar name="j" op="add" value="3" />
+        <ModifyVar name="hints" op="set" var="k" />
+      </WhileVar>
+    </IfVar>
+  </IfVar>
+  <IfVar name="scope" op="eq" value="All Notebooks" collapsed="true">
+    <IsRootOp />
+    <For each="Paragraph" in="AllNotebooks">
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="0" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="1" />
+      </That>
+      <That hasProp="text" op="containsCI" var="keywords">
+        <RightIndex value="2" />
+      </That>
+      <Under a="Page">
+        <That hasProp="isInRecycleBin" op="eq" value="false" />
+        <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+      </Under>
+      <ModifyVar name="paraID" op="set" prop="objectId">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <IfVar name="multiWords" op="lte" value="3" collapsed="true">
+        <ModifyVar name="paraText" op="set" prop="text">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="paraLink" op="set" prop="hyperlink">
+          <LeftIndex var="i" />
+        </ModifyVar>
+      </IfVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </For>
+    <ModifyVar name="hints" op="set" var="i" />
+    <IfVar name="multiWords" op="gt" value="3">
+      <IsRootOp />
+      <ModifyVar name="j" op="set" value="3" />
+      <WhileVar name="j" op="lt" var="multiWords" collapsed="true">
+        <IsRootOp />
+        <ModifyVar name="WordsRemain" op="set" var="multiWords" />
+        <ModifyVar name="WordsRemain" op="sub" var="j" />
+        <ModifyVar name="j1" op="set" var="j" />
+        <ModifyVar name="j2" op="set" var="j" />
+        <IfVar name="WordsRemain" op="gte" value="3" collapsed="true">
+          <IsRootOp />
+          <ModifyVar name="j1" op="add" value="1" />
+          <ModifyVar name="j2" op="add" value="2" />
+          <Else collapsed="true">
+            <IsRootOp />
+            <IfVar name="WordsRemain" op="eq" value="2">
+              <IsRootOp />
+              <ModifyVar name="j1" op="add" value="1" />
+            </IfVar>
+          </Else>
+        </IfVar>
+        <ModifyVar name="i" op="set" value="0" />
+        <ModifyVar name="k" op="set" value="0" />
+        <WhileVar name="i" op="lt" var="hints" collapsed="true">
+          <IsRootOp />
+          <For first="Paragraph" in="AllNotebooks">
+            <That hasProp="objectId" op="eq" var="paraID">
+              <RightIndex var="i" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j1" />
+            </That>
+            <That hasProp="text" op="containsCI" var="keywords">
+              <RightIndex var="j2" />
+            </That>
+            <Under a="Page">
+              <That hasProp="isInRecycleBin" op="eq" value="false" />
+              <That hasProp="name" op="notContainsCI" var="ExcludePagesNamed" />
+            </Under>
+            <ModifyVar name="paraID" op="set" prop="objectId">
+              <LeftIndex var="k" />
+            </ModifyVar>
+            <IfVar name="WordsRemain" op="lte" value="3">
+              <ModifyVar name="paraText" op="set" prop="text">
+                <LeftIndex var="k" />
+              </ModifyVar>
+              <ModifyVar name="paraLink" op="set" prop="hyperlink">
+                <LeftIndex var="k" />
+              </ModifyVar>
+            </IfVar>
+            <ModifyVar name="k" op="add" value="1" />
+          </For>
+          <ModifyVar name="i" op="add" value="1" />
+        </WhileVar>
+        <ModifyVar name="j" op="add" value="3" />
+        <ModifyVar name="hints" op="set" var="k" />
+      </WhileVar>
+    </IfVar>
+  </IfVar>
+  <IfVar name="hints" op="gt" value="0">
+    <IsRootOp />
+    <ModifyVar name="k" op="set" value="0" />
+    <For first="Section" in="CurrentSection">
+      <Insert type="Page" atIndex="0">
+        <ModifyVar name="pageID" op="set" prop="id" />
+        <Insert type="Outline" collapsed="true">
+          <WhileVar name="k" op="lt" var="hints">
+            <Insert type="Paragraph">
+              <Insert type="Text">
+                <ModifyVar name="index" op="set" var="k" />
+                <ModifyVar name="index" op="add" value="1" />
+                <ModifyProp name="value" op="set" var="index" />
+                <ModifyProp name="value" op="add" value=". " />
+              </Insert>
+              <Insert type="Text" collapsed="true">
+                <ModifyProp name="value" op="set" value="Found in: " />
+              </Insert>
+              <Insert type="Text">
+                <ModifyVar name="tempLink" op="set" var="paraLink">
+                  <RightIndex var="k" />
+                </ModifyVar>
+                <IfVar name="tempLink" op="contains" value="%20">
+                  <ModifyVar name="tempLinkSplit" op="set">
+                    <Function name="String_Split">
+                      <Param name="string" var="tempLink" />
+                      <Param name="delimiter" value="%20" />
+                    </Function>
+                  </ModifyVar>
+                  <ModifyVar name="tempLink" op="set" value="" />
+                  <ModifyVar name="i" op="set" value="0" />
+                  <WhileVar name="i" op="lt">
+                    <Function name="Array_Length">
+                      <Param name="array" var="tempLinkSplit" />
+                    </Function>
+                    <ModifyVar name="tempLink" op="add" var="tempLinkSplit">
+                      <RightIndex var="i" />
+                    </ModifyVar>
+                    <ModifyVar name="tempLink" op="add" value=" " />
+                    <ModifyVar name="i" op="add" value="1" />
+                  </WhileVar>
+                </IfVar>
+                <ModifyVar name="linkComp" op="set">
+                  <Function name="String_Split">
+                    <Param name="string" var="tempLink" />
+                    <Param name="delimiter" value=".one#" />
+                  </Function>
+                </ModifyVar>
+                <ModifyVar name="linkHead" op="set" var="linkComp">
+                  <RightIndex value="0" />
+                </ModifyVar>
+                <ModifyVar name="whereComp1" op="set">
+                  <Function name="String_Split">
+                    <Param name="string" var="linkHead" />
+                    <Param name="delimiter" value="/" />
+                  </Function>
+                </ModifyVar>
+                <ModifyVar name="nS" op="set">
+                  <Function name="Array_Length">
+                    <Param name="array" var="whereComp1" />
+                  </Function>
+                </ModifyVar>
+                <ModifyVar name="nS" op="sub" value="1" />
+                <ModifyVar name="whichSection" op="set" var="whereComp1">
+                  <RightIndex var="nS" />
+                </ModifyVar>
+                <ModifyVar name="nS" op="sub" value="1" />
+                <ModifyVar name="whichNoteBook" op="set" var="whereComp1">
+                  <RightIndex var="nS" />
+                </ModifyVar>
+                <ModifyVar name="linkTail" op="set">
+                  <Function name="String_Split">
+                    <Param name="string" var="linkComp">
+                      <RightIndex value="1" />
+                    </Param>
+                    <Param name="delimiter" value="&amp;section-id=" />
+                  </Function>
+                </ModifyVar>
+                <ModifyVar name="whichPage" op="set" var="linkTail">
+                  <RightIndex value="0" />
+                </ModifyVar>
+                <ModifyProp name="value" op="set" var="whichNoteBook" />
+                <ModifyProp name="value" op="add" value=" > " />
+                <ModifyProp name="value" op="add" var="whichSection" />
+                <ModifyProp name="value" op="add" value=" > " />
+                <ModifyProp name="value" op="add" var="whichPage" />
+                <ModifyProp name="hyperlink" op="set" var="paraLink">
+                  <RightIndex var="k" />
+                </ModifyProp>
+              </Insert>
+              <ModifyProp name="fontSize" op="set" value="10" />
+              <ModifyProp name="fontColor" op="set" value="gray" />
+            </Insert>
+            <Insert type="Paragraph">
+              <Insert type="Text" collapsed="true">
+                <ModifyProp name="value" op="set" var="paraText">
+                  <RightIndex var="k" />
+                </ModifyProp>
+              </Insert>
+            </Insert>
+            <Insert type="Paragraph" />
+            <ModifyVar name="k" op="add" value="1" />
+          </WhileVar>
+        </Insert>
+        <ModifyProp name="color" op="set" value="#ffeeee" />
+        <ModifyVar name="newpageID" op="set" prop="id" />
+      </Insert>
+    </For>
+    <For first="Paragraph" in="CurrentSection">
+      <Under a="Page">
+        <That hasProp="id" op="eq" var="pageID" />
+      </Under>
+      <ModifyProp name="text" op="set" value="Search Results of: " />
+      <ModifyProp name="text" op="add" var="search" />
+      <ModifyProp name="text" op="add" value=" in " />
+      <ModifyProp name="text" op="add" var="scope" />
+    </For>
+  </IfVar>
+  <ModifyVar name="msg" op="set" var="hints" />
+  <ModifyVar name="msg" op="add" value=" instances of {" />
+  <ModifyVar name="msg" op="add" var="search" />
+  <ModifyVar name="msg" op="add" value="} are found." />
+  <ModifyVar name="msg" op="set">
+    <Prompt type="message" initialValue="" values="" var="msg"></Prompt>
+  </ModifyVar>
+  <ModifyVar name="k" op="set" value="0" />
+  <IfVar name="highlightkwords" op="eq" value="true">
+    <IsRootOp />
+    <WhileVar name="k" op="lt" var="multiWords">
+      <IsRootOp />
+      <ModifyVar name="highlightkwords" op="set" var="keywords">
+        <RightIndex var="k" />
+      </ModifyVar>
+      <For each="Text">
+        <That hasProp="value" op="eqCI" var="highlightkwords" />
+        <ModifyProp name="highlightColor" op="set" value="pink" />
+      </For>
+      <ModifyVar name="k" op="add" value="1" />
+    </WhileVar>
+  </IfVar>
+</Macro>
