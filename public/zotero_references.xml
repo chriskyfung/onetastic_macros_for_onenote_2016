@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-05-10 -->
+<Macro id="M72A33958290A430CBEAC4AF81A3641A8" name="Zotero References" category="Outlining" description="Copy the all the zotero reference to the end of the current page." version="6">
+  <ModifyVar name="i" op="set" value="0" />
+  <ModifyVar name="isSort" op="set">
+    <Prompt type="dropdown" initialValue="Yes" values="Yes;No">Do you want sort the reference list to alphabatic order</Prompt>
+  </ModifyVar>
+  <For each="Text">
+    <That hasProp="hyperlink" op="startsWithCI" value="zotero://" />
+    <ModifyVar name="j" op="set" value="0" />
+    <ModifyVar name="LinkedTexts" op="set" prop="value">
+      <LeftIndex var="i" />
+    </ModifyVar>
+    <ModifyVar name="ZoteroLinks" op="set" prop="hyperlink">
+      <LeftIndex var="i" />
+    </ModifyVar>
+    <ModifyVar name="RefIndex" op="set" var="i">
+      <LeftIndex var="i" />
+    </ModifyVar>
+    <ModifyVar name="N" op="set">
+      <Function name="Array_Length">
+        <Param name="array" var="ZoteroLinks" />
+      </Function>
+    </ModifyVar>
+    <ModifyVar name="N" op="sub" value="1" />
+    <ModifyVar name="isDuplicated" op="set" value="0" />
+    <WhileVar name="j" op="lt" var="N">
+      <IfProp name="hyperlink" op="eq" var="ZoteroLinks">
+        <RightIndex var="j" />
+        <ModifyVar name="isDuplicated" op="add" value="1" />
+      </IfProp>
+      <ModifyVar name="j" op="add" value="1" />
+      <IsRootOp />
+    </WhileVar>
+    <IfVar name="isDuplicated" op="not" value="0">
+      <ModifyVar name="ZoteroLinks" op="set" value="">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="LinkedTexts" op="set" value="">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="RefIndex" op="set" value="">
+        <LeftIndex var="i" />
+      </ModifyVar>
+      <Else>
+        <ModifyVar name="i" op="add" value="1" />
+        <ModifyVar name="N" op="add" value="1" />
+        <IsRootOp />
+      </Else>
+    </IfVar>
+  </For>
+  <IfVar name="isSort" op="eq" value="Yes">
+    <IsRootOp />
+    <ModifyVar name="i" op="set" value="0" />
+    <WhileVar name="i" op="lt" var="N">
+      <IsRootOp />
+      <ModifyVar name="j" op="set" value="0" />
+      <WhileVar name="j" op="lt" var="i">
+        <IsRootOp />
+        <ModifyVar name="ii" op="set" var="RefIndex">
+          <RightIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="ji" op="set" var="RefIndex">
+          <RightIndex var="j" />
+        </ModifyVar>
+        <IfVar name="LinkedTexts" op="lt" var="LinkedTexts">
+          <LeftIndex var="ii" />
+          <RightIndex var="ji" />
+          <IsRootOp />
+          <ModifyVar name="tempIndex" op="set" var="RefIndex">
+            <RightIndex var="j" />
+          </ModifyVar>
+          <ModifyVar name="RefIndex" op="set" var="RefIndex">
+            <LeftIndex var="j" />
+            <RightIndex var="i" />
+          </ModifyVar>
+          <ModifyVar name="RefIndex" op="set" var="tempIndex">
+            <LeftIndex var="i" />
+          </ModifyVar>
+        </IfVar>
+        <ModifyVar name="j" op="add" value="1" />
+      </WhileVar>
+      <ModifyVar name="i" op="add" value="1" />
+    </WhileVar>
+  </IfVar>
+  <For first="Page">
+    <Insert type="Outline">
+      <ModifyVar name="i" op="set" value="0" />
+      <Insert type="Paragraph">
+        <Insert type="Text">
+          <ModifyProp name="value" op="set" value="References" />
+          <ModifyProp name="bold" op="set" value="true" />
+          <ModifyProp name="fontSize" op="set" value="16" />
+        </Insert>
+      </Insert>
+      <WhileVar name="i" op="lt" var="N">
+        <Insert type="Paragraph">
+          <Insert type="Text">
+            <ModifyProp name="value" op="set" value="   " />
+          </Insert>
+          <Insert type="Text">
+            <ModifyVar name="ii" op="set" var="RefIndex">
+              <RightIndex var="i" />
+            </ModifyVar>
+            <ModifyProp name="value" op="set" var="LinkedTexts">
+              <RightIndex var="ii" />
+            </ModifyProp>
+            <ModifyProp name="hyperlink" op="set" var="ZoteroLinks">
+              <RightIndex var="ii" />
+            </ModifyProp>
+          </Insert>
+          <ModifyVar name="i" op="add" value="1" />
+        </Insert>
+      </WhileVar>
+    </Insert>
+  </For>
+</Macro>
