@@ -1,185 +1,1067 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-05-09 -->
-<Macro id="M095D63DEFCDD432BAB59161BCB0F2710" name="Where am I +" category="Outlining" description="Inserts a breadcrumb showing where the current page is in the hieararchy of notebooks / section groups / sections / Parent Pages. Automatic remove the old breadcrumb." version="6">
-  <For first="Page">
-    <That hasProp="selection" op="not" value="all" />
-    <ModifyProp name="selection" op="set" value="all" />
-  </For>
-  <For first="Paragraph">
-    <That hasProp="text" op="startsWith" value="You are here: " />
-    <That hasProp="text" op="contains" value=" > " />
-    <IfProp name="text" op="containsCI" prop="hyperlink" />
-    <ModifyProp name="text" op="set" value="" />
-  </For>
-  <For each="Notebook" in="CurrentNotebook">
-    <ModifyVar name="NotebookPath" op="set" prop="path" />
-    <ModifyVar name="NotebookName" op="set" prop="name" />
-    <ModifyVar name="NotebookHyperlink" op="set" prop="hyperlink" />
-  </For>
-  <For each="Section" in="CurrentSection" collapsed="true">
-    <ModifyVar name="SectionPath" op="set" prop="path" />
-    <ModifyVar name="SectionName" op="set" prop="name" />
-    <ModifyVar name="SectionHyperlink" op="set" prop="hyperlink" />
-  </For>
-  <ModifyVar name="NBPathLen" op="set">
-    <Function name="String_Length">
-      <Param name="string" var="NotebookPath" />
-    </Function>
-  </ModifyVar>
-  <ModifyVar name="Last" op="set" var="NBPathLen" />
-  <ModifyVar name="Last" op="sub" value="1" />
-  <ModifyVar name="Separator" op="set">
-    <Function name="String_Substring">
-      <Param name="string" var="NotebookPath" />
-      <Param name="count" value="1" />
-      <Param name="offset" var="Last" />
-    </Function>
-  </ModifyVar>
-  <IfVar name="Separator" op="not" value="/" collapsed="true">
-    <IsRootOp />
-    <IfVar name="Separator" op="not" value="">
-      <IsRootOp />
-      <ModifyVar name="SectionPathLen" op="set">
-        <Function name="String_Length">
-          <Param name="string" var="SectionPath" />
-        </Function>
-      </ModifyVar>
-      <ModifyVar name="Separator" op="set">
-        <Function name="String_Substring">
-          <Param name="string" var="SectionPath" />
-          <Param name="offset" var="NBPathLen" />
-          <Param name="count" value="1" />
-        </Function>
-      </ModifyVar>
-    </IfVar>
-  </IfVar>
-  <ModifyVar name="i" op="set" value="0" />
-  <For each="SectionGroup" in="CurrentNotebook">
-    <ModifyVar name="SGPath" op="set" prop="path" />
-    <IfVar name="SGPath" op="notEndsWith" var="Separator">
-      <ModifyVar name="SGPath" op="add" var="Separator" />
-    </IfVar>
-    <IfVar name="SectionPath" op="startsWith" var="SGPath">
-      <ModifyVar name="SGHyperlinks" op="set" prop="hyperlink">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="SGNames" op="set" prop="name">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </IfVar>
-  </For>
-  <For first="Page" in="CurrentPage">
-    <ModifyVar name="PageLevel" op="set" prop="pageLevel" />
-    <ModifyVar name="PageID" op="set" prop="id" />
-    <ModifyVar name="f" op="set" value="0" />
-    <ModifyVar name="j" op="set" value="0" />
-  </For>
-  <IfVar name="PageLevel" op="gt" value="1">
-    <IsRootOp />
-    <For each="Page" in="CurrentSection">
-      <That hasProp="pageLevel" op="lte" var="PageLevel" />
-      <ModifyVar name="PageName" op="set" prop="name" />
-      <ModifyVar name="jLevel" op="set" value="1" />
-      <ModifyVar name="jLevel" op="add" var="j" />
-      <IfVar name="f" op="eq" value="0">
-        <IfProp name="pageLevel" op="lt" var="PageLevel">
-          <IfProp name="pageLevel" op="eq" var="jLevel">
-            <ModifyVar name="ParentName" op="set" prop="name">
-              <LeftIndex var="j" />
-            </ModifyVar>
-            <ModifyVar name="ParentHyperlink" op="set" prop="hyperlink">
-              <LeftIndex var="j" />
-            </ModifyVar>
-            <Else>
-              <IfProp name="pageLevel" op="gt" var="jLevel">
-                <ModifyVar name="j" op="add" value="1" />
-                <Else>
-                  <ModifyVar name="j" op="sub" value="1" />
-                  <IsRootOp />
-                </Else>
-              </IfProp>
-              <IsRootOp />
-            </Else>
-          </IfProp>
+<Macro id="M095D63DEFCDD432BAB59161BCB0F2710" name="Where am I +" category="Outlining" description="Inserts a breadcrumb showing where the current page is in the hieararchy of notebooks / section groups / sections / Parent Pages. Automatic remove the old breadcrumb." publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 6 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="For first Page in CurrentPage" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>PageObjects_2</Var></Left>
+      <Right>
+        <Call name="QueryObjects">
+          <Arg>Page</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <While>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>PageObjects_2</Var></Arg>
+          </Call></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageObject_1</Var></Left>
+        <Right>
+          <Call name="Array_PopFront">
+            <Arg>
+              <Var>PageObjects_2</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <BinaryOp name="!=">
+              <Left>
+                <Var>PageObject_1</Var>
+                <Prop>selection</Prop></Left>
+              <Right>all</Right>
+            </BinaryOp></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="Modify property(selection) --> set &quot;all&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageObject_1</Var>
+          <Prop>selection</Prop></Left>
+        <Right>all</Right>
+      </BinaryOp></Expression>
+    <Break>1</Break>
+  </While>
+  <Comment text="For first Paragraph in CurrentPage" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>ParagraphObjects_4</Var></Left>
+      <Right>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <While>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>ParagraphObjects_4</Var></Arg>
+          </Call></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>ParagraphObject_3</Var></Left>
+        <Right>
+          <Call name="Array_PopFront">
+            <Arg>
+              <Var>ParagraphObjects_4</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <Call name="String_StartsWith">
+              <Arg>
+                <Var>ParagraphObject_3</Var>
+                <Prop>text</Prop></Arg>
+              <Arg>You are here: </Arg>
+              <Arg>false</Arg>
+            </Call></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <Call name="String_Contains">
+              <Arg>
+                <Var>ParagraphObject_3</Var>
+                <Prop>text</Prop></Arg>
+              <Arg> &gt; </Arg>
+              <Arg>false</Arg>
+            </Call></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="If property(text) containsCI property(hyperlink)" />
+    <If>
+      <Condition>
+        <Call name="String_Contains">
+          <Arg>
+            <Var>ParagraphObject_3</Var>
+            <Prop>text</Prop></Arg>
+          <Arg>
+            <Var>ParagraphObject_3</Var>
+            <Prop>hyperlink</Prop></Arg>
+          <Arg>true</Arg>
+        </Call></Condition>
+    </If>
+    <Comment text="Modify property(text) --> set &quot;&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>ParagraphObject_3</Var>
+          <Prop>text</Prop></Left>
+        <Right></Right>
+      </BinaryOp></Expression>
+    <Break>1</Break>
+  </While>
+  <Comment text="For each Notebook in CurrentNotebook" />
+  <ForEach var="NotebookObject_5">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Notebook</Arg>
+        <Arg>
+          <Call name="GetCurrentNotebook" /></Arg>
+      </Call></Array>
+    <Comment text="Modify variable(NotebookPath) --> set property(path)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>NotebookPath</Var></Left>
+        <Right>
+          <Var>NotebookObject_5</Var>
+          <Prop>path</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(NotebookName) --> set property(name)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>NotebookName</Var></Left>
+        <Right>
+          <Var>NotebookObject_5</Var>
+          <Prop>name</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(NotebookHyperlink) --> set property(hyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>NotebookHyperlink</Var></Left>
+        <Right>
+          <Var>NotebookObject_5</Var>
+          <Prop>hyperlink</Prop></Right>
+      </BinaryOp></Expression>
+  </ForEach>
+  <Comment text="For each Section in CurrentSection" />
+  <ForEach collapsed="true" var="SectionObject_6">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Section</Arg>
+        <Arg>
+          <Call name="GetCurrentSection" /></Arg>
+      </Call></Array>
+    <Comment text="Modify variable(SectionPath) --> set property(path)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>SectionPath</Var></Left>
+        <Right>
+          <Var>SectionObject_6</Var>
+          <Prop>path</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(SectionName) --> set property(name)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>SectionName</Var></Left>
+        <Right>
+          <Var>SectionObject_6</Var>
+          <Prop>name</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(SectionHyperlink) --> set property(hyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>SectionHyperlink</Var></Left>
+        <Right>
+          <Var>SectionObject_6</Var>
+          <Prop>hyperlink</Prop></Right>
+      </BinaryOp></Expression>
+  </ForEach>
+  <Comment text="Modify variable(NBPathLen) --> set String_Length(variable(NotebookPath))" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>NBPathLen</Var></Left>
+      <Right>
+        <Call name="String_Length">
+          <Arg>
+            <Var>NotebookPath</Var></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(Last) --> set variable(NBPathLen)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>Last</Var></Left>
+      <Right>
+        <Var>NBPathLen</Var></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(Last) --> sub &quot;1&quot;" />
+  <Expression>
+    <BinaryOp name="-=">
+      <Left>
+        <Var>Last</Var></Left>
+      <Right>1</Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(Separator) --> set String_Substring(variable(NotebookPath), &quot;1&quot;, variable(Last))" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>Separator</Var></Left>
+      <Right>
+        <Call name="String_Substring">
+          <Arg>
+            <Var>NotebookPath</Var></Arg>
+          <Arg>
+            <Var>Last</Var></Arg>
+          <Arg>1</Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <Comment text="If variable(Separator) not &quot;/&quot;" />
+  <If collapsed="true">
+    <Condition>
+      <BinaryOp name="!=">
+        <Left>
+          <Var>Separator</Var></Left>
+        <Right>/</Right>
+      </BinaryOp></Condition>
+    <Comment text="If variable(Separator) not &quot;&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="!=">
+          <Left>
+            <Var>Separator</Var></Left>
+          <Right></Right>
+        </BinaryOp></Condition>
+      <Comment text="Modify variable(SectionPathLen) --> set String_Length(variable(SectionPath))" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>SectionPathLen</Var></Left>
+          <Right>
+            <Call name="String_Length">
+              <Arg>
+                <Var>SectionPath</Var></Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(Separator) --> set String_Substring(variable(SectionPath), variable(NBPathLen), &quot;1&quot;)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Separator</Var></Left>
+          <Right>
+            <Call name="String_Substring">
+              <Arg>
+                <Var>SectionPath</Var></Arg>
+              <Arg>
+                <Var>NBPathLen</Var></Arg>
+              <Arg>1</Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+    </If>
+  </If>
+  <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>i</Var></Left>
+      <Right>0</Right>
+    </BinaryOp></Expression>
+  <Comment text="For each SectionGroup in CurrentNotebook" />
+  <ForEach var="SectionGroupObject_7">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>SectionGroup</Arg>
+        <Arg>
+          <Call name="GetCurrentNotebook" /></Arg>
+      </Call></Array>
+    <Comment text="Modify variable(SGPath) --> set property(path)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>SGPath</Var></Left>
+        <Right>
+          <Var>SectionGroupObject_7</Var>
+          <Prop>path</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="If variable(SGPath) notEndsWith variable(Separator)" />
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <Call name="String_EndsWith">
+              <Arg>
+                <Var>SGPath</Var></Arg>
+              <Arg>
+                <Var>Separator</Var></Arg>
+              <Arg>false</Arg>
+            </Call></Operand>
+        </UnaryOp></Condition>
+      <Comment text="Modify variable(SGPath) --> add variable(Separator)" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>SGPath</Var></Left>
+          <Right>
+            <Var>Separator</Var></Right>
+        </BinaryOp></Expression>
+    </If>
+    <Comment text="If variable(SectionPath) startsWith variable(SGPath)" />
+    <If>
+      <Condition>
+        <Call name="String_StartsWith">
+          <Arg>
+            <Var>SectionPath</Var></Arg>
+          <Arg>
+            <Var>SGPath</Var></Arg>
+          <Arg>false</Arg>
+        </Call></Condition>
+      <Comment text="Modify variable(SGHyperlinks) --> set property(hyperlink)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>SGHyperlinks</Var>
+            <Index>
+              <Var>i</Var></Index></Left>
+          <Right>
+            <Var>SectionGroupObject_7</Var>
+            <Prop>hyperlink</Prop></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(SGNames) --> set property(name)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>SGNames</Var>
+            <Index>
+              <Var>i</Var></Index></Left>
+          <Right>
+            <Var>SectionGroupObject_7</Var>
+            <Prop>name</Prop></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+    </If>
+  </ForEach>
+  <Comment text="For first Page in CurrentPage" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>PageObjects_9</Var></Left>
+      <Right>
+        <Call name="QueryObjects">
+          <Arg>Page</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <While>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>PageObjects_9</Var></Arg>
+          </Call></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageObject_8</Var></Left>
+        <Right>
+          <Call name="Array_PopFront">
+            <Arg>
+              <Var>PageObjects_9</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(PageLevel) --> set property(pageLevel)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageLevel</Var></Left>
+        <Right>
+          <Var>PageObject_8</Var>
+          <Prop>pageLevel</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(PageID) --> set property(id)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageID</Var></Left>
+        <Right>
+          <Var>PageObject_8</Var>
+          <Prop>id</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(f) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>f</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(j) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>j</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Break>1</Break>
+  </While>
+  <Comment text="If variable(PageLevel) gt &quot;1&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Var>PageLevel</Var></Left>
+        <Right>1</Right>
+      </BinaryOp></Condition>
+    <Comment text="For each Page in CurrentSection" />
+    <ForEach var="PageObject_10">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Page</Arg>
+          <Arg>
+            <Call name="GetCurrentSection" /></Arg>
+        </Call></Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <BinaryOp name="&lt;=">
+                <Left>
+                  <Var>PageObject_10</Var>
+                  <Prop>pageLevel</Prop></Left>
+                <Right>
+                  <Var>PageLevel</Var></Right>
+              </BinaryOp></Operand>
+          </UnaryOp></Condition>
+        <Continue>1</Continue>
+      </If>
+      <Comment text="Modify variable(PageName) --> set property(name)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>PageName</Var></Left>
+          <Right>
+            <Var>PageObject_10</Var>
+            <Prop>name</Prop></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(jLevel) --> set &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>jLevel</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(jLevel) --> add variable(j)" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>jLevel</Var></Left>
+          <Right>
+            <Var>j</Var></Right>
+        </BinaryOp></Expression>
+      <Comment text="If variable(f) eq &quot;0&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name="==">
+            <Left>
+              <Var>f</Var></Left>
+            <Right>0</Right>
+          </BinaryOp></Condition>
+        <Comment text="If property(pageLevel) lt variable(PageLevel)" />
+        <If>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>PageObject_10</Var>
+                <Prop>pageLevel</Prop></Left>
+              <Right>
+                <Var>PageLevel</Var></Right>
+            </BinaryOp></Condition>
+          <Comment text="If property(pageLevel) eq variable(jLevel)" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>PageObject_10</Var>
+                  <Prop>pageLevel</Prop></Left>
+                <Right>
+                  <Var>jLevel</Var></Right>
+              </BinaryOp></Condition>
+            <Comment text="Modify variable(ParentName) --> set property(name)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParentName</Var>
+                  <Index>
+                    <Var>j</Var></Index></Left>
+                <Right>
+                  <Var>PageObject_10</Var>
+                  <Prop>name</Prop></Right>
+              </BinaryOp></Expression>
+            <Comment text="Modify variable(ParentHyperlink) --> set property(hyperlink)" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>ParentHyperlink</Var>
+                  <Index>
+                    <Var>j</Var></Index></Left>
+                <Right>
+                  <Var>PageObject_10</Var>
+                  <Prop>hyperlink</Prop></Right>
+              </BinaryOp></Expression>
+          </If>
           <Else>
-            <IfProp name="id" op="eq" var="PageID">
-              <ModifyVar name="f" op="set" value="1" />
-              <ModifyVar name="j" op="set" value="0" />
-            </IfProp>
-            <IsRootOp />
+            <Comment text="If property(pageLevel) gt variable(jLevel)" />
+            <If>
+              <Condition>
+                <BinaryOp name=">">
+                  <Left>
+                    <Var>PageObject_10</Var>
+                    <Prop>pageLevel</Prop></Left>
+                  <Right>
+                    <Var>jLevel</Var></Right>
+                </BinaryOp></Condition>
+              <Comment text="Modify variable(j) --> add &quot;1&quot;" />
+              <Expression>
+                <BinaryOp name="+=">
+                  <Left>
+                    <Var>j</Var></Left>
+                  <Right>1</Right>
+                </BinaryOp></Expression>
+            </If>
+            <Else>
+              <Comment text="Modify variable(j) --> sub &quot;1&quot;" />
+              <Expression>
+                <BinaryOp name="-=">
+                  <Left>
+                    <Var>j</Var></Left>
+                  <Right>1</Right>
+                </BinaryOp></Expression>
+            </Else>
           </Else>
-        </IfProp>
-      </IfVar>
-    </For>
-  </IfVar>
-  <For first="Page">
-    <ModifyVar name="PageName" op="set" prop="name" />
-    <ModifyVar name="PageHyperlink" op="set" prop="hyperlink" />
-    <IfProp name="pageLevel" op="lte" value="1" />
-    <Insert type="Outline">
-      <ModifyProp name="x" op="set" value="400" />
-      <ModifyProp name="y" op="set" value="20" />
-      <ModifyProp name="selection" op="set" value="all" />
-      <Insert type="Paragraph">
-        <ModifyProp name="selection" op="set" value="all" />
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" value="You are here: " />
-          <ModifyProp name="bold" op="set" value="true" />
-        </Insert>
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" var="NotebookName" />
-          <ModifyProp name="hyperlink" op="set" var="NotebookHyperlink" />
-        </Insert>
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" value=" > " />
-        </Insert>
-        <WhileVar name="i" op="gt" value="1" collapsed="true">
-          <ModifyVar name="i" op="sub" value="1" />
-          <Insert type="Text">
-            <ModifyProp name="value" op="set" var="SGNames">
-              <RightIndex var="i" />
-            </ModifyProp>
-            <ModifyProp name="hyperlink" op="set" var="SGHyperlinks">
-              <RightIndex var="i" />
-            </ModifyProp>
-          </Insert>
-          <Insert type="Text">
-            <ModifyProp name="value" op="set" value=" > " />
-          </Insert>
-        </WhileVar>
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" var="SectionName" />
-          <ModifyProp name="hyperlink" op="set" var="SectionHyperlink" />
-        </Insert>
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" value=" > " />
-        </Insert>
-        <IfVar name="f" op="eq" value="1">
-          <WhileVar name="j" op="lt">
-            <Function name="Array_Length">
-              <Param name="array" var="ParentName" />
-            </Function>
-            <Insert type="Text">
-              <ModifyProp name="value" op="set" var="ParentName">
-                <RightIndex var="j" />
-              </ModifyProp>
-              <ModifyProp name="hyperlink" op="set" var="ParentHyperlink">
-                <RightIndex var="j" />
-              </ModifyProp>
-            </Insert>
-            <Insert type="Text">
-              <ModifyProp name="value" op="set" value=" > " />
-              <ModifyVar name="j" op="add" value="1" />
-            </Insert>
-          </WhileVar>
-        </IfVar>
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" var="PageName" />
-          <ModifyProp name="hyperlink" op="set" var="PageHyperlink" />
-        </Insert>
-        <ModifyProp name="fontSize" op="set" value="10" />
-      </Insert>
-    </Insert>
-  </For>
+        </If>
+        <Else>
+          <Comment text="If property(id) eq variable(PageID)" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>PageObject_10</Var>
+                  <Prop>id</Prop></Left>
+                <Right>
+                  <Var>PageID</Var></Right>
+              </BinaryOp></Condition>
+            <Comment text="Modify variable(f) --> set &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>f</Var></Left>
+                <Right>1</Right>
+              </BinaryOp></Expression>
+            <Comment text="Modify variable(j) --> set &quot;0&quot;" />
+            <Expression>
+              <BinaryOp name="=">
+                <Left>
+                  <Var>j</Var></Left>
+                <Right>0</Right>
+              </BinaryOp></Expression>
+          </If>
+        </Else>
+      </If>
+    </ForEach>
+  </If>
+  <Comment text="For first Page in CurrentPage" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>PageObjects_24</Var></Left>
+      <Right>
+        <Call name="QueryObjects">
+          <Arg>Page</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <While>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>PageObjects_24</Var></Arg>
+          </Call></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageObject_11</Var></Left>
+        <Right>
+          <Call name="Array_PopFront">
+            <Arg>
+              <Var>PageObjects_24</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(PageName) --> set property(name)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageName</Var></Left>
+        <Right>
+          <Var>PageObject_11</Var>
+          <Prop>name</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(PageHyperlink) --> set property(hyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageHyperlink</Var></Left>
+        <Right>
+          <Var>PageObject_11</Var>
+          <Prop>hyperlink</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="If property(pageLevel) lte &quot;1&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="&lt;=">
+          <Left>
+            <Var>PageObject_11</Var>
+            <Prop>pageLevel</Prop></Left>
+          <Right>1</Right>
+        </BinaryOp></Condition>
+    </If>
+    <Comment text="Insert Outline at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_OutlineObject_12</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>PageObject_11</Var></Arg>
+            <Arg>Outline</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(x) --> set &quot;400&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_OutlineObject_12</Var>
+          <Prop>x</Prop></Left>
+        <Right>400</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(y) --> set &quot;20&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_OutlineObject_12</Var>
+          <Prop>y</Prop></Left>
+        <Right>20</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(selection) --> set &quot;all&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_OutlineObject_12</Var>
+          <Prop>selection</Prop></Left>
+        <Right>all</Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Paragraph at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_ParagraphObject_13</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_OutlineObject_12</Var></Arg>
+            <Arg>Paragraph</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(selection) --> set &quot;all&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_ParagraphObject_13</Var>
+          <Prop>selection</Prop></Left>
+        <Right>all</Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_14</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_13</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set &quot;You are here: &quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_14</Var>
+          <Prop>value</Prop></Left>
+        <Right>You are here: </Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(bold) --> set &quot;true&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_14</Var>
+          <Prop>bold</Prop></Left>
+        <Right>true</Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_15</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_13</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set variable(NotebookName)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_15</Var>
+          <Prop>value</Prop></Left>
+        <Right>
+          <Var>NotebookName</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(hyperlink) --> set variable(NotebookHyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_15</Var>
+          <Prop>hyperlink</Prop></Left>
+        <Right>
+          <Var>NotebookHyperlink</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_16</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_13</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set &quot; > &quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_16</Var>
+          <Prop>value</Prop></Left>
+        <Right> &gt; </Right>
+      </BinaryOp></Expression>
+    <Comment text="While variable(i) gt &quot;1&quot;" />
+    <While collapsed="true">
+      <Condition>
+        <BinaryOp name=">">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Condition>
+      <Comment text="Modify variable(i) --> sub &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="-=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+      <Comment text="Insert Text at index -1" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_17</Var></Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>Inserted_ParagraphObject_13</Var></Arg>
+              <Arg>Text</Arg>
+              <Arg>-1</Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify property(value) --> set variable(SGNames)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_17</Var>
+            <Prop>value</Prop></Left>
+          <Right>
+            <Var>SGNames</Var>
+            <Index>
+              <Var>i</Var></Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify property(hyperlink) --> set variable(SGHyperlinks)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_17</Var>
+            <Prop>hyperlink</Prop></Left>
+          <Right>
+            <Var>SGHyperlinks</Var>
+            <Index>
+              <Var>i</Var></Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="Insert Text at index -1" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_18</Var></Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>Inserted_ParagraphObject_13</Var></Arg>
+              <Arg>Text</Arg>
+              <Arg>-1</Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify property(value) --> set &quot; > &quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_18</Var>
+            <Prop>value</Prop></Left>
+          <Right> &gt; </Right>
+        </BinaryOp></Expression>
+    </While>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_19</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_13</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set variable(SectionName)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_19</Var>
+          <Prop>value</Prop></Left>
+        <Right>
+          <Var>SectionName</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(hyperlink) --> set variable(SectionHyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_19</Var>
+          <Prop>hyperlink</Prop></Left>
+        <Right>
+          <Var>SectionHyperlink</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_20</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_13</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set &quot; > &quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_20</Var>
+          <Prop>value</Prop></Left>
+        <Right> &gt; </Right>
+      </BinaryOp></Expression>
+    <Comment text="If variable(f) eq &quot;1&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="==">
+          <Left>
+            <Var>f</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Condition>
+      <Comment text="While variable(j) lt Array_Length(variable(ParentName))" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var></Left>
+            <Right>
+              <Call name="Array_Length">
+                <Arg>
+                  <Var>ParentName</Var></Arg>
+              </Call></Right>
+          </BinaryOp></Condition>
+        <Comment text="Insert Text at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_21</Var></Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_ParagraphObject_13</Var></Arg>
+                <Arg>Text</Arg>
+                <Arg>-1</Arg>
+              </Call></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(value) --> set variable(ParentName)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_21</Var>
+              <Prop>value</Prop></Left>
+            <Right>
+              <Var>ParentName</Var>
+              <Index>
+                <Var>j</Var></Index></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(hyperlink) --> set variable(ParentHyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_21</Var>
+              <Prop>hyperlink</Prop></Left>
+            <Right>
+              <Var>ParentHyperlink</Var>
+              <Index>
+                <Var>j</Var></Index></Right>
+          </BinaryOp></Expression>
+        <Comment text="Insert Text at index -1" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_22</Var></Left>
+            <Right>
+              <Call name="InsertObject">
+                <Arg>
+                  <Var>Inserted_ParagraphObject_13</Var></Arg>
+                <Arg>Text</Arg>
+                <Arg>-1</Arg>
+              </Call></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(value) --> set &quot; > &quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Inserted_TextObject_22</Var>
+              <Prop>value</Prop></Left>
+            <Right> &gt; </Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(j) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </While>
+    </If>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_23</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_13</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set variable(PageName)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_23</Var>
+          <Prop>value</Prop></Left>
+        <Right>
+          <Var>PageName</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(hyperlink) --> set variable(PageHyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_23</Var>
+          <Prop>hyperlink</Prop></Left>
+        <Right>
+          <Var>PageHyperlink</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(fontSize) --> set &quot;10&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_ParagraphObject_13</Var>
+          <Prop>fontSize</Prop></Left>
+        <Right>10</Right>
+      </BinaryOp></Expression>
+    <Break>1</Break>
+  </While>
 </Macro>

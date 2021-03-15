@@ -1,98 +1,550 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-07-22 -->
-<Macro id="MC607E847CD2744239E66BF43A1BA1EB7" name="Expand/Collapse Outlines" category="Outlining" description="Toggle Expand/Collapse, or expand to the selected outlines to the chosen level (Level 1 to 9 as well as all levels)." version="7">
-  <ModifyVar name="ExpandLevel" op="set">
-    <Prompt type="dropdown" initialValue="Toggle selected" values="Toggle selected;1;2;3;4;5;6;7;8;9;All">Level</Prompt>
-  </ModifyVar>
-  <ModifyVar name="msg" op="set">
-    <Prompt type="message" initialValue="" values="">* Collapse = 1</Prompt>
-  </ModifyVar>
-  <ModifyVar name="msg" op="set">
-    <Prompt type="message" initialValue="" values="">or use default shortcut key ALT+SHIFT+ [1-0]</Prompt>
-  </ModifyVar>
-  <For each="Text" collapsed="true">
-    <That hasProp="selected" op="eq" value="true" />
-    <ModifyProp name="selected" op="set" value="false" />
-  </For>
-  <IfVar name="ExpandLevel" op="not" value="Toggle">
-    <IsRootOp />
-    <IfVar name="ExpandLevel" op="eq" value="1">
-      <IsRootOp />
-      <For each="Paragraph">
-        <That hasProp="selection" op="not" value="none" />
-        <ModifyProp name="collapsed" op="set" value="true" />
-      </For>
-      <Else>
-        <IsRootOp />
-        <For each="Paragraph">
-          <That hasProp="selection" op="not" value="none" />
-          <ModifyProp name="collapsed" op="set" value="false" />
-        </For>
-        <For each="Paragraph">
-          <Under a="Paragraph">
-            <That hasProp="selection" op="not" value="none" />
-          </Under>
-          <ModifyProp name="collapsed" op="set" value="false" />
-          <ModifyProp name="selection" op="set" value="partial" />
-        </For>
-        <IfVar name="ExpandLevel" op="not" value="All">
-          <IsRootOp />
-          <ModifyVar name="Count" op="set" value="0" />
-          <For each="Paragraph">
-            <That hasProp="selection" op="not" value="none" />
-            <Under a="Paragraph" />
-            <ModifyProp name="collapsed" op="set" value="true" />
-            <ModifyProp name="selection" op="set" value="none" />
-          </For>
-          <For each="Paragraph" collapsed="true">
-            <That hasProp="selection" op="not" value="none" />
-            <ModifyVar name="TopParaID" op="set" prop="objectId">
-              <LeftIndex var="Count" />
-            </ModifyVar>
-            <ModifyVar name="Count" op="add" value="1" />
-          </For>
-          <ModifyVar name="LevelCount" op="set" value="2" />
-          <WhileVar name="LevelCount" op="lt" var="ExpandLevel">
-            <IsRootOp />
-            <ModifyVar name="Count" op="set" value="0" />
-            <ModifyVar name="newCount" op="set" value="0" />
-            <WhileVar name="Count" op="lt">
-              <Function name="Array_Length">
-                <Param name="array" var="TopParaID" />
-              </Function>
-              <IsRootOp />
-              <For each="Paragraph">
-                <Under directly="true" a="Paragraph">
-                  <That hasProp="objectId" op="eq" var="TopParaID">
-                    <RightIndex var="Count" />
-                  </That>
-                </Under>
-                <ModifyProp name="collapsed" op="set" value="false" />
-                <ModifyVar name="NewParaID" op="set" prop="objectId">
-                  <LeftIndex var="newCount" />
-                </ModifyVar>
-                <ModifyVar name="newCount" op="add" value="1" />
-              </For>
-              <ModifyVar name="Count" op="add" value="1" />
-            </WhileVar>
-            <ModifyVar name="LevelCount" op="add" value="1" />
-            <ModifyVar name="TopParaID" op="set" var="NewParaID" />
-          </WhileVar>
-        </IfVar>
-      </Else>
-    </IfVar>
-    <Else collapsed="true">
-      <IsRootOp />
-      <For each="Paragraph">
-        <That hasProp="selection" op="not" value="none" />
-        <ModifyVar name="status" op="set" prop="collapsed" />
-        <IfVar name="status" op="eq" value="true">
-          <ModifyProp name="collapsed" op="set" value="false" />
-          <Else>
-            <ModifyProp name="collapsed" op="set" value="true" />
-          </Else>
-        </IfVar>
-      </For>
+<Macro id="MC607E847CD2744239E66BF43A1BA1EB7" name="Expand/Collapse Outlines" category="Outlining" description="Toggle Expand/Collapse, or expand to the selected outlines to the chosen level (Level 1 to 9 as well as all levels)." publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 7 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="Modify variable(ExpandLevel) --> set prompt(Level)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>dialog_box</Var></Left>
+      <Right>
+        <Call name="DialogBox_Create">
+          <Arg></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <Expression>
+    <Call name="DialogBox_AddDropDown">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>Level</Arg>
+      <Arg>control_1</Arg>
+      <Arg>Toggle selected</Arg>
+      <Arg>
+        <Call name="Array">
+          <Arg>Toggle selected</Arg>
+          <Arg>1</Arg>
+          <Arg>2</Arg>
+          <Arg>3</Arg>
+          <Arg>4</Arg>
+          <Arg>5</Arg>
+          <Arg>6</Arg>
+          <Arg>7</Arg>
+          <Arg>8</Arg>
+          <Arg>9</Arg>
+          <Arg>All</Arg>
+        </Call></Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_AddLabel">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>* Collapse = 1</Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_AddLabel">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>or use default shortcut key ALT+SHIFT+ [1-0]</Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_Show">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+    </Call></Expression>
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>ExpandLevel</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_1</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(msg) --> set prompt(* Collapse = 1)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>msg</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_2</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(msg) --> set prompt(or use default shortcut key ALT+SHIFT+ [1-0])" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>msg</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_3</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="For each Text in CurrentPage" />
+  <ForEach collapsed="true" var="TextObject_4">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Text</Arg>
+        <Arg>
+          <Call name="GetCurrentPage" /></Arg>
+      </Call></Array>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <BinaryOp name="==">
+              <Left>
+                <Var>TextObject_4</Var>
+                <Prop>selected</Prop></Left>
+              <Right>true</Right>
+            </BinaryOp></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="Modify property(selected) --> set &quot;false&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>TextObject_4</Var>
+          <Prop>selected</Prop></Left>
+        <Right>false</Right>
+      </BinaryOp></Expression>
+  </ForEach>
+  <Comment text="If variable(ExpandLevel) not &quot;Toggle&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name="!=">
+        <Left>
+          <Var>ExpandLevel</Var></Left>
+        <Right>Toggle</Right>
+      </BinaryOp></Condition>
+    <Comment text="If variable(ExpandLevel) eq &quot;1&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="==">
+          <Left>
+            <Var>ExpandLevel</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Condition>
+      <Comment text="For each Paragraph in CurrentPage" />
+      <ForEach var="ParagraphObject_5">
+        <Array>
+          <Call name="QueryObjects">
+            <Arg>Paragraph</Arg>
+            <Arg>
+              <Call name="GetCurrentPage" /></Arg>
+          </Call></Array>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="!=">
+                  <Left>
+                    <Var>ParagraphObject_5</Var>
+                    <Prop>selection</Prop></Left>
+                  <Right>none</Right>
+                </BinaryOp></Operand>
+            </UnaryOp></Condition>
+          <Continue>1</Continue>
+        </If>
+        <Comment text="Modify property(collapsed) --> set &quot;true&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ParagraphObject_5</Var>
+              <Prop>collapsed</Prop></Left>
+            <Right>true</Right>
+          </BinaryOp></Expression>
+      </ForEach>
+    </If>
+    <Else>
+      <Comment text="For each Paragraph in CurrentPage" />
+      <ForEach var="ParagraphObject_6">
+        <Array>
+          <Call name="QueryObjects">
+            <Arg>Paragraph</Arg>
+            <Arg>
+              <Call name="GetCurrentPage" /></Arg>
+          </Call></Array>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="!=">
+                  <Left>
+                    <Var>ParagraphObject_6</Var>
+                    <Prop>selection</Prop></Left>
+                  <Right>none</Right>
+                </BinaryOp></Operand>
+            </UnaryOp></Condition>
+          <Continue>1</Continue>
+        </If>
+        <Comment text="Modify property(collapsed) --> set &quot;false&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ParagraphObject_6</Var>
+              <Prop>collapsed</Prop></Left>
+            <Right>false</Right>
+          </BinaryOp></Expression>
+      </ForEach>
+      <Comment text="For each Paragraph in CurrentPage" />
+      <ForEach var="ParagraphObject_7">
+        <Array>
+          <Call name="QueryObjects">
+            <Arg>Paragraph</Arg>
+            <Arg>
+              <Call name="GetCurrentPage" /></Arg>
+          </Call></Array>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <Call name="GetAncestorOfType">
+                  <Arg>
+                    <Var>ParagraphObject_7</Var></Arg>
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Var>AncestorOfType_Paragraph_8</Var></Arg>
+                </Call></Operand>
+            </UnaryOp></Condition>
+          <Continue>1</Continue>
+        </If>
+        <Else>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <BinaryOp name="!=">
+                    <Left>
+                      <Var>AncestorOfType_Paragraph_8</Var>
+                      <Prop>selection</Prop></Left>
+                    <Right>none</Right>
+                  </BinaryOp></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
+        </Else>
+        <Comment text="Modify property(collapsed) --> set &quot;false&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ParagraphObject_7</Var>
+              <Prop>collapsed</Prop></Left>
+            <Right>false</Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(selection) --> set &quot;partial&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ParagraphObject_7</Var>
+              <Prop>selection</Prop></Left>
+            <Right>partial</Right>
+          </BinaryOp></Expression>
+      </ForEach>
+      <Comment text="If variable(ExpandLevel) not &quot;All&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name="!=">
+            <Left>
+              <Var>ExpandLevel</Var></Left>
+            <Right>All</Right>
+          </BinaryOp></Condition>
+        <Comment text="Modify variable(Count) --> set &quot;0&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>Count</Var></Left>
+            <Right>0</Right>
+          </BinaryOp></Expression>
+        <Comment text="For each Paragraph in CurrentPage" />
+        <ForEach var="ParagraphObject_9">
+          <Array>
+            <Call name="QueryObjects">
+              <Arg>Paragraph</Arg>
+              <Arg>
+                <Call name="GetCurrentPage" /></Arg>
+            </Call></Array>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <BinaryOp name="!=">
+                    <Left>
+                      <Var>ParagraphObject_9</Var>
+                      <Prop>selection</Prop></Left>
+                    <Right>none</Right>
+                  </BinaryOp></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <Call name="GetAncestorOfType">
+                    <Arg>
+                      <Var>ParagraphObject_9</Var></Arg>
+                    <Arg>Paragraph</Arg>
+                    <Arg>
+                      <Var>AncestorOfType_Paragraph_10</Var></Arg>
+                  </Call></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
+          <Comment text="Modify property(collapsed) --> set &quot;true&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObject_9</Var>
+                <Prop>collapsed</Prop></Left>
+              <Right>true</Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify property(selection) --> set &quot;none&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ParagraphObject_9</Var>
+                <Prop>selection</Prop></Left>
+              <Right>none</Right>
+            </BinaryOp></Expression>
+        </ForEach>
+        <Comment text="For each Paragraph in CurrentPage" />
+        <ForEach collapsed="true" var="ParagraphObject_11">
+          <Array>
+            <Call name="QueryObjects">
+              <Arg>Paragraph</Arg>
+              <Arg>
+                <Call name="GetCurrentPage" /></Arg>
+            </Call></Array>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <BinaryOp name="!=">
+                    <Left>
+                      <Var>ParagraphObject_11</Var>
+                      <Prop>selection</Prop></Left>
+                    <Right>none</Right>
+                  </BinaryOp></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
+          <Comment text="Modify variable(TopParaID) --> set property(objectId)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>TopParaID</Var>
+                <Index>
+                  <Var>Count</Var></Index></Left>
+              <Right>
+                <Var>ParagraphObject_11</Var>
+                <Prop>objectId</Prop></Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify variable(Count) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>Count</Var></Left>
+              <Right>1</Right>
+            </BinaryOp></Expression>
+        </ForEach>
+        <Comment text="Modify variable(LevelCount) --> set &quot;2&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>LevelCount</Var></Left>
+            <Right>2</Right>
+          </BinaryOp></Expression>
+        <Comment text="While variable(LevelCount) lt variable(ExpandLevel)" />
+        <While>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>LevelCount</Var></Left>
+              <Right>
+                <Var>ExpandLevel</Var></Right>
+            </BinaryOp></Condition>
+          <Comment text="Modify variable(Count) --> set &quot;0&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>Count</Var></Left>
+              <Right>0</Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify variable(newCount) --> set &quot;0&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>newCount</Var></Left>
+              <Right>0</Right>
+            </BinaryOp></Expression>
+          <Comment text="While variable(Count) lt Array_Length(variable(TopParaID))" />
+          <While>
+            <Condition>
+              <BinaryOp name="&lt;">
+                <Left>
+                  <Var>Count</Var></Left>
+                <Right>
+                  <Call name="Array_Length">
+                    <Arg>
+                      <Var>TopParaID</Var></Arg>
+                  </Call></Right>
+              </BinaryOp></Condition>
+            <Comment text="For each Paragraph in CurrentPage" />
+            <ForEach var="ParagraphObject_12">
+              <Array>
+                <Call name="QueryObjects">
+                  <Arg>Paragraph</Arg>
+                  <Arg>
+                    <Call name="GetCurrentPage" /></Arg>
+                </Call></Array>
+              <If>
+                <Condition>
+                  <UnaryOp name="!">
+                    <Operand>
+                      <Call name="GetParentOfType">
+                        <Arg>
+                          <Var>ParagraphObject_12</Var></Arg>
+                        <Arg>Paragraph</Arg>
+                        <Arg>
+                          <Var>AncestorOfType_Paragraph_13</Var></Arg>
+                      </Call></Operand>
+                  </UnaryOp></Condition>
+                <Continue>1</Continue>
+              </If>
+              <Else>
+                <If>
+                  <Condition>
+                    <UnaryOp name="!">
+                      <Operand>
+                        <BinaryOp name="==">
+                          <Left>
+                            <Var>AncestorOfType_Paragraph_13</Var>
+                            <Prop>objectId</Prop></Left>
+                          <Right>
+                            <Var>TopParaID</Var>
+                            <Index>
+                              <Var>Count</Var></Index></Right>
+                        </BinaryOp></Operand>
+                    </UnaryOp></Condition>
+                  <Continue>1</Continue>
+                </If>
+              </Else>
+              <Comment text="Modify property(collapsed) --> set &quot;false&quot;" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>ParagraphObject_12</Var>
+                    <Prop>collapsed</Prop></Left>
+                  <Right>false</Right>
+                </BinaryOp></Expression>
+              <Comment text="Modify variable(NewParaID) --> set property(objectId)" />
+              <Expression>
+                <BinaryOp name="=">
+                  <Left>
+                    <Var>NewParaID</Var>
+                    <Index>
+                      <Var>newCount</Var></Index></Left>
+                  <Right>
+                    <Var>ParagraphObject_12</Var>
+                    <Prop>objectId</Prop></Right>
+                </BinaryOp></Expression>
+              <Comment text="Modify variable(newCount) --> add &quot;1&quot;" />
+              <Expression>
+                <BinaryOp name="+=">
+                  <Left>
+                    <Var>newCount</Var></Left>
+                  <Right>1</Right>
+                </BinaryOp></Expression>
+            </ForEach>
+            <Comment text="Modify variable(Count) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>Count</Var></Left>
+                <Right>1</Right>
+              </BinaryOp></Expression>
+          </While>
+          <Comment text="Modify variable(LevelCount) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>LevelCount</Var></Left>
+              <Right>1</Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify variable(TopParaID) --> set variable(NewParaID)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>TopParaID</Var></Left>
+              <Right>
+                <Var>NewParaID</Var></Right>
+            </BinaryOp></Expression>
+        </While>
+      </If>
     </Else>
-  </IfVar>
+  </If>
+  <Else collapsed="true">
+    <Comment text="For each Paragraph in CurrentPage" />
+    <ForEach var="ParagraphObject_14">
+      <Array>
+        <Call name="QueryObjects">
+          <Arg>Paragraph</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Array>
+      <If>
+        <Condition>
+          <UnaryOp name="!">
+            <Operand>
+              <BinaryOp name="!=">
+                <Left>
+                  <Var>ParagraphObject_14</Var>
+                  <Prop>selection</Prop></Left>
+                <Right>none</Right>
+              </BinaryOp></Operand>
+          </UnaryOp></Condition>
+        <Continue>1</Continue>
+      </If>
+      <Comment text="Modify variable(status) --> set property(collapsed)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>status</Var></Left>
+          <Right>
+            <Var>ParagraphObject_14</Var>
+            <Prop>collapsed</Prop></Right>
+        </BinaryOp></Expression>
+      <Comment text="If variable(status) eq &quot;true&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name="==">
+            <Left>
+              <Var>status</Var></Left>
+            <Right>true</Right>
+          </BinaryOp></Condition>
+        <Comment text="Modify property(collapsed) --> set &quot;false&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ParagraphObject_14</Var>
+              <Prop>collapsed</Prop></Left>
+            <Right>false</Right>
+          </BinaryOp></Expression>
+      </If>
+      <Else>
+        <Comment text="Modify property(collapsed) --> set &quot;true&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ParagraphObject_14</Var>
+              <Prop>collapsed</Prop></Left>
+            <Right>true</Right>
+          </BinaryOp></Expression>
+      </Else>
+    </ForEach>
+  </Else>
 </Macro>

@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-12-31 -->
-<Macro id="M20307E93D78C4FE2AE8F60D39DABB1D1" name="Clean Strikethrogh" category="Content" description="Remove strikethrough texts in CurrentPage" version="8">
-  <For each="Text">
-    <That hasProp="strikethrough" op="eq" value="true" />
-    <ModifyProp name="value" op="set" value="" />
-  </For>
+<Macro id="M20307E93D78C4FE2AE8F60D39DABB1D1" name="Clean Strikethrogh" category="Content" description="Remove strikethrough texts in CurrentPage" publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 8 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="For each Text in CurrentPage" />
+  <ForEach var="TextObject_1">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Text</Arg>
+        <Arg>
+          <Call name="GetCurrentPage" /></Arg>
+      </Call></Array>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <BinaryOp name="==">
+              <Left>
+                <Var>TextObject_1</Var>
+                <Prop>strikethrough</Prop></Left>
+              <Right>true</Right>
+            </BinaryOp></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="Modify property(value) --> set &quot;&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>TextObject_1</Var>
+          <Prop>value</Prop></Left>
+        <Right></Right>
+      </BinaryOp></Expression>
+  </ForEach>
 </Macro>

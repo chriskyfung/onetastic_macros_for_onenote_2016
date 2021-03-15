@@ -1,33 +1,110 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-05-09 -->
-<Macro id="M9817157C119B495E9B0B87B86F586552" name="Zotero Link in form of Author, Year" category="Link" description="Convert each Quick Copy of Zotero Scanable Cite { | Author, Year | | |zotero://select/items/#_########} on the current page to a text in form of &quot;Author, Year&quot; with a hyperlink linked to Zotero. Each cite must in an individual paragraph." version="6">
-  <For each="Text">
-    <IfProp name="hyperlink" op="containsCI" value="">
-      <IfProp name="value" op="containsCI" value="zotero://">
-        <ModifyVar name="T1" op="set" prop="value" />
-        <ModifyVar name="LL" op="set">
-          <Function name="String_Length">
-            <Param name="string" var="T1" />
-          </Function>
-        </ModifyVar>
-        <ModifyVar name="LL" op="sub" value="33" />
-        <ModifyVar name="T2" op="set">
-          <Function name="String_Substring">
-            <Param name="string" var="T1" />
-            <Param name="offset" var="LL" />
-            <Param name="count" value="32" />
-          </Function>
-        </ModifyVar>
-        <ModifyProp name="hyperlink" op="set" var="T2" />
-        <ModifyVar name="LL" op="sub" value="10" />
-        <ModifyProp name="value" op="set">
-          <Function name="String_Substring">
-            <Param name="string" var="T1" />
-            <Param name="offset" value="4" />
-            <Param name="count" var="LL" />
-          </Function>
-        </ModifyProp>
-      </IfProp>
-    </IfProp>
-  </For>
+<Macro id="M9817157C119B495E9B0B87B86F586552" name="Zotero Link in form of Author, Year" category="Hyperlink" description="Convert each Quick Copy of Zotero Scanable Cite { | Author, Year | | |zotero://select/items/#_########} on the current page to a text in form of &quot;Author, Year&quot; with a hyperlink linked to Zotero. Each cite must in an individual paragraph." publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 6 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="For each Text in CurrentPage" />
+  <ForEach var="TextObject_1">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Text</Arg>
+        <Arg>
+          <Call name="GetCurrentPage" /></Arg>
+      </Call></Array>
+    <Comment text="If property(hyperlink) containsCI &quot;&quot;" />
+    <If>
+      <Condition>
+        <Call name="String_Contains">
+          <Arg>
+            <Var>TextObject_1</Var>
+            <Prop>hyperlink</Prop></Arg>
+          <Arg></Arg>
+          <Arg>true</Arg>
+        </Call></Condition>
+      <Comment text="If property(value) containsCI &quot;zotero://&quot;" />
+      <If>
+        <Condition>
+          <Call name="String_Contains">
+            <Arg>
+              <Var>TextObject_1</Var>
+              <Prop>value</Prop></Arg>
+            <Arg>zotero://</Arg>
+            <Arg>true</Arg>
+          </Call></Condition>
+        <Comment text="Modify variable(T1) --> set property(value)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>T1</Var></Left>
+            <Right>
+              <Var>TextObject_1</Var>
+              <Prop>value</Prop></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(LL) --> set String_Length(variable(T1))" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>LL</Var></Left>
+            <Right>
+              <Call name="String_Length">
+                <Arg>
+                  <Var>T1</Var></Arg>
+              </Call></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(LL) --> sub &quot;33&quot;" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>LL</Var></Left>
+            <Right>33</Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(T2) --> set String_Substring(variable(T1), variable(LL), &quot;32&quot;)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>T2</Var></Left>
+            <Right>
+              <Call name="String_Substring">
+                <Arg>
+                  <Var>T1</Var></Arg>
+                <Arg>
+                  <Var>LL</Var></Arg>
+                <Arg>32</Arg>
+              </Call></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(hyperlink) --> set variable(T2)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>TextObject_1</Var>
+              <Prop>hyperlink</Prop></Left>
+            <Right>
+              <Var>T2</Var></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(LL) --> sub &quot;10&quot;" />
+        <Expression>
+          <BinaryOp name="-=">
+            <Left>
+              <Var>LL</Var></Left>
+            <Right>10</Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(value) --> set String_Substring(variable(T1), &quot;4&quot;, variable(LL))" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>TextObject_1</Var>
+              <Prop>value</Prop></Left>
+            <Right>
+              <Call name="String_Substring">
+                <Arg>
+                  <Var>T1</Var></Arg>
+                <Arg>4</Arg>
+                <Arg>
+                  <Var>LL</Var></Arg>
+              </Call></Right>
+          </BinaryOp></Expression>
+      </If>
+    </If>
+  </ForEach>
 </Macro>

@@ -1,64 +1,379 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-06-06 -->
-<Macro id="MA61FBC5536CB4FB4B3FDABDDA29C31DC" name="Column Widths+" category="Table" description="Sets the width of selected or all column(s) the selected table on the current page to the specified value." version="7">
-  <ModifyVar name="ColumnWidth" op="set">
-    <Prompt type="text" initialValue="95" values="">&amp;Specify column width</Prompt>
-  </ModifyVar>
-  <ModifyVar name="IsSelectOnly" op="set">
-    <Prompt type="checkbox" initialValue="All" values="All;Selected Only">&amp;ONLY Selected column(s) ?</Prompt>
-  </ModifyVar>
-  <ModifyVar name="COLUMNWIDTH" op="set" var="ColumnWidth" />
-  <ModifyVar name="HasSelectedTable" op="set" value="0" />
-  <For first="Table">
-    <That hasProp="selection" op="not" value="none" />
-    <ModifyVar name="HasSelectedTable" op="set" value="1" />
-  </For>
-  <IfVar name="HasSelectedTable" op="eq" value="0">
-    <IsRootOp />
-    <ModifyVar name="IsSelectOnly" op="set">
-      <Prompt type="message" initialValue="" values="">No table has been selected!</Prompt>
-    </ModifyVar>
-    <Else>
-      <IsRootOp />
-      <IfVar name="IsSelectOnly" op="not" value="true">
-        <IsRootOp />
-        <For each="Column">
-          <Under a="Table">
-            <That hasProp="selection" op="not" value="none" />
-          </Under>
-          <ModifyProp name="width" op="set" var="ColumnWidth" />
-          <ModifyProp name="isLocked" op="set" value="true" />
-        </For>
+<Macro id="MA61FBC5536CB4FB4B3FDABDDA29C31DC" name="Column Widths+" category="Table" description="Sets the width of selected or all column(s) the selected table on the current page to the specified value." publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 7 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="Modify variable(ColumnWidth) --> set prompt(&amp;Specify column width)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>dialog_box</Var></Left>
+      <Right>
+        <Call name="DialogBox_Create">
+          <Arg></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <Expression>
+    <Call name="DialogBox_AddTextBox">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>&amp;Specify column width</Arg>
+      <Arg>control_1</Arg>
+      <Arg>95</Arg>
+      <Arg>false</Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_AddCheckBox">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>&amp;ONLY Selected column(s) ?</Arg>
+      <Arg>control_2</Arg>
+      <Arg>All</Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_Show">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+    </Call></Expression>
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>ColumnWidth</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_1</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(IsSelectOnly) --> set prompt(&amp;ONLY Selected column(s) ?)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>IsSelectOnly</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_2</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(COLUMNWIDTH) --> set variable(ColumnWidth)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>COLUMNWIDTH</Var></Left>
+      <Right>
+        <Var>ColumnWidth</Var></Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(HasSelectedTable) --> set &quot;0&quot;" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>HasSelectedTable</Var></Left>
+      <Right>0</Right>
+    </BinaryOp></Expression>
+  <Comment text="For first Table in CurrentPage" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>TableObjects_4</Var></Left>
+      <Right>
+        <Call name="QueryObjects">
+          <Arg>Table</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <While>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>TableObjects_4</Var></Arg>
+          </Call></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>TableObject_3</Var></Left>
+        <Right>
+          <Call name="Array_PopFront">
+            <Arg>
+              <Var>TableObjects_4</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <BinaryOp name="!=">
+              <Left>
+                <Var>TableObject_3</Var>
+                <Prop>selection</Prop></Left>
+              <Right>none</Right>
+            </BinaryOp></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="Modify variable(HasSelectedTable) --> set &quot;1&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>HasSelectedTable</Var></Left>
+        <Right>1</Right>
+      </BinaryOp></Expression>
+    <Break>1</Break>
+  </While>
+  <Comment text="If variable(HasSelectedTable) eq &quot;0&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>HasSelectedTable</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Comment text="Modify variable(IsSelectOnly) --> set prompt(No table has been selected!)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>dialog_box</Var></Left>
+        <Right>
+          <Call name="DialogBox_Create">
+            <Arg></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>No table has been selected!</Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_Show">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+      </Call></Expression>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>IsSelectOnly</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_5</Index></Right>
+      </BinaryOp></Expression>
+  </If>
+  <Else>
+    <Comment text="If variable(IsSelectOnly) not &quot;true&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="!=">
+          <Left>
+            <Var>IsSelectOnly</Var></Left>
+          <Right>true</Right>
+        </BinaryOp></Condition>
+      <Comment text="For each Column in CurrentPage" />
+      <ForEach var="ColumnObject_6">
+        <Array>
+          <Call name="QueryObjects">
+            <Arg>Column</Arg>
+            <Arg>
+              <Call name="GetCurrentPage" /></Arg>
+          </Call></Array>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <Call name="GetAncestorOfType">
+                  <Arg>
+                    <Var>ColumnObject_6</Var></Arg>
+                  <Arg>Table</Arg>
+                  <Arg>
+                    <Var>AncestorOfType_Table_7</Var></Arg>
+                </Call></Operand>
+            </UnaryOp></Condition>
+          <Continue>1</Continue>
+        </If>
         <Else>
-          <IsRootOp />
-          <ModifyVar name="i" op="set" value="0" />
-          <For each="Cell">
-            <That hasProp="selection" op="eq" value="partial" />
-            <ModifyVar name="ColIndex" op="set" prop="colIndex">
-              <LeftIndex var="i" />
-            </ModifyVar>
-            <ModifyVar name="i" op="add" value="1" />
-          </For>
-          <ModifyVar name="i" op="set" value="0" />
-          <WhileVar name="i" op="lt">
-            <Function name="Array_Length">
-              <Param name="array" var="ColIndex" />
-            </Function>
-            <IsRootOp />
-            <For each="Column">
-              <That hasProp="index" op="eq" var="ColIndex">
-                <RightIndex var="i" />
-              </That>
-              <Under a="Table">
-                <That hasProp="selection" op="not" value="none" />
-              </Under>
-              <ModifyProp name="width" op="set" var="COLUMNWIDTH" />
-              <ModifyProp name="isLocked" op="set" value="true" />
-              <ModifyVar name="i" op="add" value="1" />
-            </For>
-          </WhileVar>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <BinaryOp name="!=">
+                    <Left>
+                      <Var>AncestorOfType_Table_7</Var>
+                      <Prop>selection</Prop></Left>
+                    <Right>none</Right>
+                  </BinaryOp></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
         </Else>
-      </IfVar>
+        <Comment text="Modify property(width) --> set variable(ColumnWidth)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ColumnObject_6</Var>
+              <Prop>width</Prop></Left>
+            <Right>
+              <Var>ColumnWidth</Var></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify property(isLocked) --> set &quot;true&quot;" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ColumnObject_6</Var>
+              <Prop>isLocked</Prop></Left>
+            <Right>true</Right>
+          </BinaryOp></Expression>
+      </ForEach>
+    </If>
+    <Else>
+      <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>0</Right>
+        </BinaryOp></Expression>
+      <Comment text="For each Cell in CurrentPage" />
+      <ForEach var="CellObject_8">
+        <Array>
+          <Call name="QueryObjects">
+            <Arg>Cell</Arg>
+            <Arg>
+              <Call name="GetCurrentPage" /></Arg>
+          </Call></Array>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>CellObject_8</Var>
+                    <Prop>selection</Prop></Left>
+                  <Right>partial</Right>
+                </BinaryOp></Operand>
+            </UnaryOp></Condition>
+          <Continue>1</Continue>
+        </If>
+        <Comment text="Modify variable(ColIndex) --> set property(colIndex)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ColIndex</Var>
+              <Index>
+                <Var>i</Var></Index></Left>
+            <Right>
+              <Var>CellObject_8</Var>
+              <Prop>colIndex</Prop></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>i</Var></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </ForEach>
+      <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>0</Right>
+        </BinaryOp></Expression>
+      <Comment text="While variable(i) lt Array_Length(variable(ColIndex))" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>i</Var></Left>
+            <Right>
+              <Call name="Array_Length">
+                <Arg>
+                  <Var>ColIndex</Var></Arg>
+              </Call></Right>
+          </BinaryOp></Condition>
+        <Comment text="For each Column in CurrentPage" />
+        <ForEach var="ColumnObject_9">
+          <Array>
+            <Call name="QueryObjects">
+              <Arg>Column</Arg>
+              <Arg>
+                <Call name="GetCurrentPage" /></Arg>
+            </Call></Array>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <BinaryOp name="==">
+                    <Left>
+                      <Var>ColumnObject_9</Var>
+                      <Prop>index</Prop></Left>
+                    <Right>
+                      <Var>ColIndex</Var>
+                      <Index>
+                        <Var>i</Var></Index></Right>
+                  </BinaryOp></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
+          <If>
+            <Condition>
+              <UnaryOp name="!">
+                <Operand>
+                  <Call name="GetAncestorOfType">
+                    <Arg>
+                      <Var>ColumnObject_9</Var></Arg>
+                    <Arg>Table</Arg>
+                    <Arg>
+                      <Var>AncestorOfType_Table_10</Var></Arg>
+                  </Call></Operand>
+              </UnaryOp></Condition>
+            <Continue>1</Continue>
+          </If>
+          <Else>
+            <If>
+              <Condition>
+                <UnaryOp name="!">
+                  <Operand>
+                    <BinaryOp name="!=">
+                      <Left>
+                        <Var>AncestorOfType_Table_10</Var>
+                        <Prop>selection</Prop></Left>
+                      <Right>none</Right>
+                    </BinaryOp></Operand>
+                </UnaryOp></Condition>
+              <Continue>1</Continue>
+            </If>
+          </Else>
+          <Comment text="Modify property(width) --> set variable(COLUMNWIDTH)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ColumnObject_9</Var>
+                <Prop>width</Prop></Left>
+              <Right>
+                <Var>COLUMNWIDTH</Var></Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify property(isLocked) --> set &quot;true&quot;" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>ColumnObject_9</Var>
+                <Prop>isLocked</Prop></Left>
+              <Right>true</Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>i</Var></Left>
+              <Right>1</Right>
+            </BinaryOp></Expression>
+        </ForEach>
+      </While>
     </Else>
-  </IfVar>
+  </Else>
 </Macro>

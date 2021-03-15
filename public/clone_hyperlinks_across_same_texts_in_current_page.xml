@@ -1,109 +1,525 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-12-31 -->
-<Macro id="M8940E16FF6B14449B186A1D0F31308A0" name="Clone Hyperlinks" category="Productivity" description="Clone Hyperlinks Across Same Texts in Current Page. Find each text with hyperlink, and then clone the hyperlink to the same texts in Current Page. Last updated: 2015-01-01 (fixed bugs)" version="8">
-  <ModifyVar name="i" op="set" value="0" />
-  <ModifyVar name="minlen" op="set">
-    <Prompt type="text" initialValue="5" values="">Minimum length of text</Prompt>
-  </ModifyVar>
-  <For each="Text">
-    <That hasProp="hyperlink" op="not" value="" />
-    <ModifyVar name="temp_text" op="set" prop="value" />
-    <IfVar name="minlen" op="lte">
-      <Function name="String_Length">
-        <Param name="string" var="temp_text" />
-      </Function>
-      <ModifyVar name="j" op="set" value="0" />
-      <WhileVar name="j" op="lt" var="i">
-        <IfProp name="hyperlink" op="eq" var="link">
-          <RightIndex var="j" />
-          <IfProp name="value" op="eq" var="text">
-            <RightIndex var="j" />
-            <ModifyVar name="j" op="add" var="i" />
-            <ModifyVar name="j" op="add" value="2" />
-            <Else>
-              <ModifyVar name="j" op="add" value="1" />
-            </Else>
-          </IfProp>
+<Macro id="M8940E16FF6B14449B186A1D0F31308A0" name="Clone Hyperlinks" category="Hyperlink" description="Clone Hyperlinks Across Same Texts in Current Page. Find each text with hyperlink, and then clone the hyperlink to the same texts in Current Page. Last updated: 2015-01-01 (fixed bugs)" publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 8 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>i</Var></Left>
+      <Right>0</Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(minlen) --> set prompt(Minimum length of text)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>dialog_box</Var></Left>
+      <Right>
+        <Call name="DialogBox_Create">
+          <Arg></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <Expression>
+    <Call name="DialogBox_AddTextBox">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>Minimum length of text</Arg>
+      <Arg>control_1</Arg>
+      <Arg>5</Arg>
+      <Arg>false</Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_Show">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+    </Call></Expression>
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>minlen</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_1</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="For each Text in CurrentPage" />
+  <ForEach var="TextObject_2">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Text</Arg>
+        <Arg>
+          <Call name="GetCurrentPage" /></Arg>
+      </Call></Array>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <BinaryOp name="!=">
+              <Left>
+                <Var>TextObject_2</Var>
+                <Prop>hyperlink</Prop></Left>
+              <Right></Right>
+            </BinaryOp></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="Modify variable(temp_text) --> set property(value)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>temp_text</Var></Left>
+        <Right>
+          <Var>TextObject_2</Var>
+          <Prop>value</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="If variable(minlen) lte String_Length(variable(temp_text))" />
+    <If>
+      <Condition>
+        <BinaryOp name="&lt;=">
+          <Left>
+            <Var>minlen</Var></Left>
+          <Right>
+            <Call name="String_Length">
+              <Arg>
+                <Var>temp_text</Var></Arg>
+            </Call></Right>
+        </BinaryOp></Condition>
+      <Comment text="Modify variable(j) --> set &quot;0&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var></Left>
+          <Right>0</Right>
+        </BinaryOp></Expression>
+      <Comment text="While variable(j) lt variable(i)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var></Left>
+            <Right>
+              <Var>i</Var></Right>
+          </BinaryOp></Condition>
+        <Comment text="If property(hyperlink) eq variable(link)" />
+        <If>
+          <Condition>
+            <BinaryOp name="==">
+              <Left>
+                <Var>TextObject_2</Var>
+                <Prop>hyperlink</Prop></Left>
+              <Right>
+                <Var>link</Var>
+                <Index>
+                  <Var>j</Var></Index></Right>
+            </BinaryOp></Condition>
+          <Comment text="If property(value) eq variable(text)" />
+          <If>
+            <Condition>
+              <BinaryOp name="==">
+                <Left>
+                  <Var>TextObject_2</Var>
+                  <Prop>value</Prop></Left>
+                <Right>
+                  <Var>text</Var>
+                  <Index>
+                    <Var>j</Var></Index></Right>
+              </BinaryOp></Condition>
+            <Comment text="Modify variable(j) --> add variable(i)" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j</Var></Left>
+                <Right>
+                  <Var>i</Var></Right>
+              </BinaryOp></Expression>
+            <Comment text="Modify variable(j) --> add &quot;2&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j</Var></Left>
+                <Right>2</Right>
+              </BinaryOp></Expression>
+          </If>
           <Else>
-            <ModifyVar name="j" op="add" value="1" />
+            <Comment text="Modify variable(j) --> add &quot;1&quot;" />
+            <Expression>
+              <BinaryOp name="+=">
+                <Left>
+                  <Var>j</Var></Left>
+                <Right>1</Right>
+              </BinaryOp></Expression>
           </Else>
-        </IfProp>
-      </WhileVar>
-      <IfVar name="j" op="eq" var="i">
-        <ModifyVar name="text" op="set" prop="value">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="link" op="set" prop="hyperlink">
-          <LeftIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="i" op="add" value="1" />
-      </IfVar>
-    </IfVar>
-  </For>
-  <ModifyVar name="N" op="set" var="i" />
-  <IfVar name="N" op="gt" value="0">
-    <IsRootOp />
-    <ModifyVar name="i" op="set" value="0" />
-    <ModifyVar name="n" op="set" value="0" />
-    <WhileVar name="i" op="lt" var="N">
-      <IsRootOp />
-      <ModifyVar name="nClones" op="set" value="0">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="msg" op="set" var="text">
-        <RightIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="msg" op="set">
-        <Prompt type="message" initialValue="" values="" var="msg"></Prompt>
-      </ModifyVar>
-      <For each="Text">
-        <That hasProp="value" op="eq" var="text">
-          <RightIndex var="i" />
-        </That>
-        <That hasProp="hyperlink" op="eq" value="" />
-        <ModifyProp name="hyperlink" op="set" var="link">
-          <RightIndex var="i" />
-        </ModifyProp>
-        <ModifyVar name="nClones" op="add" value="1">
-          <LeftIndex var="i" />
-        </ModifyVar>
-      </For>
-      <ModifyVar name="i" op="add" value="1" />
-      <IfVar name="nClones" op="gt" value="0">
-        <LeftIndex var="i" />
-        <IsRootOp />
-        <ModifyVar name="n" op="add" value="1" />
-      </IfVar>
-    </WhileVar>
-    <ModifyVar name="Stat" op="set">
-      <Function name="Array_Join">
-        <Param name="array" var="nClones" />
-        <Param name="glue" value="   " />
-      </Function>
-    </ModifyVar>
-    <ModifyVar name="msg" op="set">
-      <Prompt type="message" initialValue="" values="" var="N"></Prompt>
-    </ModifyVar>
-    <ModifyVar name="msg" op="set">
-      <Prompt type="message" initialValue="" values="">unique hyperkinks (N)</Prompt>
-    </ModifyVar>
-    <ModifyVar name="msg" op="set">
-      <Prompt type="message" initialValue="" values="" var="n"></Prompt>
-    </ModifyVar>
-    <ModifyVar name="msg" op="set">
-      <Prompt type="message" initialValue="" values="">of N cloned</Prompt>
-    </ModifyVar>
-    <ModifyVar name="msg" op="set">
-      <Prompt type="message" initialValue="" values="" var="Stat"></Prompt>
-    </ModifyVar>
-    <ModifyVar name="msg" op="set">
-      <Prompt type="message" initialValue="" values="">No. of clones per link</Prompt>
-    </ModifyVar>
-    <Else>
-      <IsRootOp />
-      <ModifyVar name="Stat" op="set">
-        <Prompt type="message" initialValue="" values="">No Hyperlink in Current Page</Prompt>
-      </ModifyVar>
-    </Else>
-  </IfVar>
+        </If>
+        <Else>
+          <Comment text="Modify variable(j) --> add &quot;1&quot;" />
+          <Expression>
+            <BinaryOp name="+=">
+              <Left>
+                <Var>j</Var></Left>
+              <Right>1</Right>
+            </BinaryOp></Expression>
+        </Else>
+      </While>
+      <Comment text="If variable(j) eq variable(i)" />
+      <If>
+        <Condition>
+          <BinaryOp name="==">
+            <Left>
+              <Var>j</Var></Left>
+            <Right>
+              <Var>i</Var></Right>
+          </BinaryOp></Condition>
+        <Comment text="Modify variable(text) --> set property(value)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>text</Var>
+              <Index>
+                <Var>i</Var></Index></Left>
+            <Right>
+              <Var>TextObject_2</Var>
+              <Prop>value</Prop></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(link) --> set property(hyperlink)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>link</Var>
+              <Index>
+                <Var>i</Var></Index></Left>
+            <Right>
+              <Var>TextObject_2</Var>
+              <Prop>hyperlink</Prop></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>i</Var></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </If>
+    </If>
+  </ForEach>
+  <Comment text="Modify variable(N) --> set variable(i)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>N</Var></Left>
+      <Right>
+        <Var>i</Var></Right>
+    </BinaryOp></Expression>
+  <Comment text="If variable(N) gt &quot;0&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Var>N</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>i</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(n) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>n</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="While variable(i) lt variable(N)" />
+    <While>
+      <Condition>
+        <BinaryOp name="&lt;">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>
+            <Var>N</Var></Right>
+        </BinaryOp></Condition>
+      <Comment text="Modify variable(nClones) --> set &quot;0&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>nClones</Var>
+            <Index>
+              <Var>i</Var></Index></Left>
+          <Right>0</Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(msg) --> set variable(text)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>msg</Var></Left>
+          <Right>
+            <Var>text</Var>
+            <Index>
+              <Var>i</Var></Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(msg) --> set prompt(variable(msg))" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>dialog_box</Var></Left>
+          <Right>
+            <Call name="DialogBox_Create">
+              <Arg></Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Expression>
+        <Call name="DialogBox_AddLabel">
+          <Arg>
+            <Var>dialog_box</Var></Arg>
+          <Arg>
+            <Var>msg</Var></Arg>
+        </Call></Expression>
+      <Expression>
+        <Call name="DialogBox_Show">
+          <Arg>
+            <Var>dialog_box</Var></Arg>
+        </Call></Expression>
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>msg</Var></Left>
+          <Right>
+            <Var>dialog_box</Var>
+            <Prop>controls</Prop>
+            <Index>control_3</Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="For each Text in CurrentPage" />
+      <ForEach var="TextObject_4">
+        <Array>
+          <Call name="QueryText">
+            <Arg>
+              <Call name="GetCurrentPage" /></Arg>
+            <Arg>
+              <Var>text</Var>
+              <Index>
+                <Var>i</Var></Index></Arg>
+            <Arg>false</Arg>
+          </Call></Array>
+        <If>
+          <Condition>
+            <UnaryOp name="!">
+              <Operand>
+                <BinaryOp name="==">
+                  <Left>
+                    <Var>TextObject_4</Var>
+                    <Prop>hyperlink</Prop></Left>
+                  <Right></Right>
+                </BinaryOp></Operand>
+            </UnaryOp></Condition>
+          <Continue>1</Continue>
+        </If>
+        <Comment text="Modify property(hyperlink) --> set variable(link)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>TextObject_4</Var>
+              <Prop>hyperlink</Prop></Left>
+            <Right>
+              <Var>link</Var>
+              <Index>
+                <Var>i</Var></Index></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(nClones) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>nClones</Var>
+              <Index>
+                <Var>i</Var></Index></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </ForEach>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+      <Comment text="If variable(nClones) gt &quot;0&quot;" />
+      <If>
+        <Condition>
+          <BinaryOp name=">">
+            <Left>
+              <Var>nClones</Var>
+              <Index>
+                <Var>i</Var></Index></Left>
+            <Right>0</Right>
+          </BinaryOp></Condition>
+        <Comment text="Modify variable(n) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>n</Var></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </If>
+    </While>
+    <Comment text="Modify variable(Stat) --> set Array_Join(variable(nClones), &quot;   &quot;)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Stat</Var></Left>
+        <Right>
+          <Call name="Array_Join">
+            <Arg>
+              <Var>nClones</Var></Arg>
+            <Arg>   </Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(msg) --> set prompt(variable(N))" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>dialog_box</Var></Left>
+        <Right>
+          <Call name="DialogBox_Create">
+            <Arg></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>
+          <Var>N</Var></Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>unique hyperkinks (N)</Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>
+          <Var>n</Var></Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>of N cloned</Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>
+          <Var>Stat</Var></Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>No. of clones per link</Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_Show">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+      </Call></Expression>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>msg</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_5</Index></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(msg) --> set prompt(unique hyperkinks (N))" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>msg</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_6</Index></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(msg) --> set prompt(variable(n))" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>msg</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_7</Index></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(msg) --> set prompt(of N cloned)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>msg</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_8</Index></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(msg) --> set prompt(variable(Stat))" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>msg</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_9</Index></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(msg) --> set prompt(No. of clones per link)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>msg</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_10</Index></Right>
+      </BinaryOp></Expression>
+  </If>
+  <Else>
+    <Comment text="Modify variable(Stat) --> set prompt(No Hyperlink in Current Page)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>dialog_box</Var></Left>
+        <Right>
+          <Call name="DialogBox_Create">
+            <Arg></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Expression>
+      <Call name="DialogBox_AddLabel">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+        <Arg>No Hyperlink in Current Page</Arg>
+      </Call></Expression>
+    <Expression>
+      <Call name="DialogBox_Show">
+        <Arg>
+          <Var>dialog_box</Var></Arg>
+      </Call></Expression>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Stat</Var></Left>
+        <Right>
+          <Var>dialog_box</Var>
+          <Prop>controls</Prop>
+          <Index>control_11</Index></Right>
+      </BinaryOp></Expression>
+  </Else>
 </Macro>

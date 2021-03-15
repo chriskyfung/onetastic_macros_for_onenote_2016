@@ -1,117 +1,550 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-05-10 -->
-<Macro id="M72A33958290A430CBEAC4AF81A3641A8" name="Zotero References" category="Outlining" description="Copy the all the zotero reference to the end of the current page." version="6">
-  <ModifyVar name="i" op="set" value="0" />
-  <ModifyVar name="isSort" op="set">
-    <Prompt type="dropdown" initialValue="Yes" values="Yes;No">Do you want sort the reference list to alphabatic order</Prompt>
-  </ModifyVar>
-  <For each="Text">
-    <That hasProp="hyperlink" op="startsWithCI" value="zotero://" />
-    <ModifyVar name="j" op="set" value="0" />
-    <ModifyVar name="LinkedTexts" op="set" prop="value">
-      <LeftIndex var="i" />
-    </ModifyVar>
-    <ModifyVar name="ZoteroLinks" op="set" prop="hyperlink">
-      <LeftIndex var="i" />
-    </ModifyVar>
-    <ModifyVar name="RefIndex" op="set" var="i">
-      <LeftIndex var="i" />
-    </ModifyVar>
-    <ModifyVar name="N" op="set">
-      <Function name="Array_Length">
-        <Param name="array" var="ZoteroLinks" />
-      </Function>
-    </ModifyVar>
-    <ModifyVar name="N" op="sub" value="1" />
-    <ModifyVar name="isDuplicated" op="set" value="0" />
-    <WhileVar name="j" op="lt" var="N">
-      <IfProp name="hyperlink" op="eq" var="ZoteroLinks">
-        <RightIndex var="j" />
-        <ModifyVar name="isDuplicated" op="add" value="1" />
-      </IfProp>
-      <ModifyVar name="j" op="add" value="1" />
-      <IsRootOp />
-    </WhileVar>
-    <IfVar name="isDuplicated" op="not" value="0">
-      <ModifyVar name="ZoteroLinks" op="set" value="">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="LinkedTexts" op="set" value="">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="RefIndex" op="set" value="">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <Else>
-        <ModifyVar name="i" op="add" value="1" />
-        <ModifyVar name="N" op="add" value="1" />
-        <IsRootOp />
-      </Else>
-    </IfVar>
-  </For>
-  <IfVar name="isSort" op="eq" value="Yes">
-    <IsRootOp />
-    <ModifyVar name="i" op="set" value="0" />
-    <WhileVar name="i" op="lt" var="N">
-      <IsRootOp />
-      <ModifyVar name="j" op="set" value="0" />
-      <WhileVar name="j" op="lt" var="i">
-        <IsRootOp />
-        <ModifyVar name="ii" op="set" var="RefIndex">
-          <RightIndex var="i" />
-        </ModifyVar>
-        <ModifyVar name="ji" op="set" var="RefIndex">
-          <RightIndex var="j" />
-        </ModifyVar>
-        <IfVar name="LinkedTexts" op="lt" var="LinkedTexts">
-          <LeftIndex var="ii" />
-          <RightIndex var="ji" />
-          <IsRootOp />
-          <ModifyVar name="tempIndex" op="set" var="RefIndex">
-            <RightIndex var="j" />
-          </ModifyVar>
-          <ModifyVar name="RefIndex" op="set" var="RefIndex">
-            <LeftIndex var="j" />
-            <RightIndex var="i" />
-          </ModifyVar>
-          <ModifyVar name="RefIndex" op="set" var="tempIndex">
-            <LeftIndex var="i" />
-          </ModifyVar>
-        </IfVar>
-        <ModifyVar name="j" op="add" value="1" />
-      </WhileVar>
-      <ModifyVar name="i" op="add" value="1" />
-    </WhileVar>
-  </IfVar>
-  <For first="Page">
-    <Insert type="Outline">
-      <ModifyVar name="i" op="set" value="0" />
-      <Insert type="Paragraph">
-        <Insert type="Text">
-          <ModifyProp name="value" op="set" value="References" />
-          <ModifyProp name="bold" op="set" value="true" />
-          <ModifyProp name="fontSize" op="set" value="16" />
-        </Insert>
-      </Insert>
-      <WhileVar name="i" op="lt" var="N">
-        <Insert type="Paragraph">
-          <Insert type="Text">
-            <ModifyProp name="value" op="set" value="   " />
-          </Insert>
-          <Insert type="Text">
-            <ModifyVar name="ii" op="set" var="RefIndex">
-              <RightIndex var="i" />
-            </ModifyVar>
-            <ModifyProp name="value" op="set" var="LinkedTexts">
-              <RightIndex var="ii" />
-            </ModifyProp>
-            <ModifyProp name="hyperlink" op="set" var="ZoteroLinks">
-              <RightIndex var="ii" />
-            </ModifyProp>
-          </Insert>
-          <ModifyVar name="i" op="add" value="1" />
-        </Insert>
-      </WhileVar>
-    </Insert>
-  </For>
+<Macro id="M72A33958290A430CBEAC4AF81A3641A8" name="Zotero References" category="Outlining" description="Copy the all the zotero reference to the end of the current page." publishDate="2016-06-19T07:00:00.000Z" version="11">
+  <Comment text="This macro was automatically upgraded from version 6 to version 11" />
+  <Comment text="Old macro commands are inserted as comments below" />
+  <Comment text="See http://omeratay.com/onetastic/docs for documentation on the new macro language" />
+  <Comment text="----------------------------------------------------------------------------------" />
+  <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>i</Var></Left>
+      <Right>0</Right>
+    </BinaryOp></Expression>
+  <Comment text="Modify variable(isSort) --> set prompt(Do you want sort the reference list to alphabatic order)" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>dialog_box</Var></Left>
+      <Right>
+        <Call name="DialogBox_Create">
+          <Arg></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <Expression>
+    <Call name="DialogBox_AddDropDown">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+      <Arg>Do you want sort the reference list to alphabatic order</Arg>
+      <Arg>control_1</Arg>
+      <Arg>Yes</Arg>
+      <Arg>
+        <Call name="Array">
+          <Arg>Yes</Arg>
+          <Arg>No</Arg>
+        </Call></Arg>
+    </Call></Expression>
+  <Expression>
+    <Call name="DialogBox_Show">
+      <Arg>
+        <Var>dialog_box</Var></Arg>
+    </Call></Expression>
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>isSort</Var></Left>
+      <Right>
+        <Var>dialog_box</Var>
+        <Prop>controls</Prop>
+        <Index>control_1</Index></Right>
+    </BinaryOp></Expression>
+  <Comment text="For each Text in CurrentPage" />
+  <ForEach var="TextObject_2">
+    <Array>
+      <Call name="QueryObjects">
+        <Arg>Text</Arg>
+        <Arg>
+          <Call name="GetCurrentPage" /></Arg>
+      </Call></Array>
+    <If>
+      <Condition>
+        <UnaryOp name="!">
+          <Operand>
+            <Call name="String_StartsWith">
+              <Arg>
+                <Var>TextObject_2</Var>
+                <Prop>hyperlink</Prop></Arg>
+              <Arg>zotero://</Arg>
+              <Arg>true</Arg>
+            </Call></Operand>
+        </UnaryOp></Condition>
+      <Continue>1</Continue>
+    </If>
+    <Comment text="Modify variable(j) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>j</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(LinkedTexts) --> set property(value)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>LinkedTexts</Var>
+          <Index>
+            <Var>i</Var></Index></Left>
+        <Right>
+          <Var>TextObject_2</Var>
+          <Prop>value</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(ZoteroLinks) --> set property(hyperlink)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>ZoteroLinks</Var>
+          <Index>
+            <Var>i</Var></Index></Left>
+        <Right>
+          <Var>TextObject_2</Var>
+          <Prop>hyperlink</Prop></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(RefIndex) --> set variable(i)" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>RefIndex</Var>
+          <Index>
+            <Var>i</Var></Index></Left>
+        <Right>
+          <Var>i</Var></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(N) --> set Array_Length(variable(ZoteroLinks))" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>N</Var></Left>
+        <Right>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>ZoteroLinks</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(N) --> sub &quot;1&quot;" />
+    <Expression>
+      <BinaryOp name="-=">
+        <Left>
+          <Var>N</Var></Left>
+        <Right>1</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(isDuplicated) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>isDuplicated</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="While variable(j) lt variable(N)" />
+    <While>
+      <Condition>
+        <BinaryOp name="&lt;">
+          <Left>
+            <Var>j</Var></Left>
+          <Right>
+            <Var>N</Var></Right>
+        </BinaryOp></Condition>
+      <Comment text="If property(hyperlink) eq variable(ZoteroLinks)" />
+      <If>
+        <Condition>
+          <BinaryOp name="==">
+            <Left>
+              <Var>TextObject_2</Var>
+              <Prop>hyperlink</Prop></Left>
+            <Right>
+              <Var>ZoteroLinks</Var>
+              <Index>
+                <Var>j</Var></Index></Right>
+          </BinaryOp></Condition>
+        <Comment text="Modify variable(isDuplicated) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>isDuplicated</Var></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </If>
+      <Comment text="Modify variable(j) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>j</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+    </While>
+    <Comment text="If variable(isDuplicated) not &quot;0&quot;" />
+    <If>
+      <Condition>
+        <BinaryOp name="!=">
+          <Left>
+            <Var>isDuplicated</Var></Left>
+          <Right>0</Right>
+        </BinaryOp></Condition>
+      <Comment text="Modify variable(ZoteroLinks) --> set &quot;&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>ZoteroLinks</Var>
+            <Index>
+              <Var>i</Var></Index></Left>
+          <Right></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(LinkedTexts) --> set &quot;&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>LinkedTexts</Var>
+            <Index>
+              <Var>i</Var></Index></Left>
+          <Right></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(RefIndex) --> set &quot;&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>RefIndex</Var>
+            <Index>
+              <Var>i</Var></Index></Left>
+          <Right></Right>
+        </BinaryOp></Expression>
+    </If>
+    <Else>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(N) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>N</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+    </Else>
+  </ForEach>
+  <Comment text="If variable(isSort) eq &quot;Yes&quot;" />
+  <If>
+    <Condition>
+      <BinaryOp name="==">
+        <Left>
+          <Var>isSort</Var></Left>
+        <Right>Yes</Right>
+      </BinaryOp></Condition>
+    <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>i</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="While variable(i) lt variable(N)" />
+    <While>
+      <Condition>
+        <BinaryOp name="&lt;">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>
+            <Var>N</Var></Right>
+        </BinaryOp></Condition>
+      <Comment text="Modify variable(j) --> set &quot;0&quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>j</Var></Left>
+          <Right>0</Right>
+        </BinaryOp></Expression>
+      <Comment text="While variable(j) lt variable(i)" />
+      <While>
+        <Condition>
+          <BinaryOp name="&lt;">
+            <Left>
+              <Var>j</Var></Left>
+            <Right>
+              <Var>i</Var></Right>
+          </BinaryOp></Condition>
+        <Comment text="Modify variable(ii) --> set variable(RefIndex)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ii</Var></Left>
+            <Right>
+              <Var>RefIndex</Var>
+              <Index>
+                <Var>i</Var></Index></Right>
+          </BinaryOp></Expression>
+        <Comment text="Modify variable(ji) --> set variable(RefIndex)" />
+        <Expression>
+          <BinaryOp name="=">
+            <Left>
+              <Var>ji</Var></Left>
+            <Right>
+              <Var>RefIndex</Var>
+              <Index>
+                <Var>j</Var></Index></Right>
+          </BinaryOp></Expression>
+        <Comment text="If variable(LinkedTexts) lt variable(LinkedTexts)" />
+        <If>
+          <Condition>
+            <BinaryOp name="&lt;">
+              <Left>
+                <Var>LinkedTexts</Var>
+                <Index>
+                  <Var>ii</Var></Index></Left>
+              <Right>
+                <Var>LinkedTexts</Var>
+                <Index>
+                  <Var>ji</Var></Index></Right>
+            </BinaryOp></Condition>
+          <Comment text="Modify variable(tempIndex) --> set variable(RefIndex)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>tempIndex</Var></Left>
+              <Right>
+                <Var>RefIndex</Var>
+                <Index>
+                  <Var>j</Var></Index></Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify variable(RefIndex) --> set variable(RefIndex)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>RefIndex</Var>
+                <Index>
+                  <Var>j</Var></Index></Left>
+              <Right>
+                <Var>RefIndex</Var>
+                <Index>
+                  <Var>i</Var></Index></Right>
+            </BinaryOp></Expression>
+          <Comment text="Modify variable(RefIndex) --> set variable(tempIndex)" />
+          <Expression>
+            <BinaryOp name="=">
+              <Left>
+                <Var>RefIndex</Var>
+                <Index>
+                  <Var>i</Var></Index></Left>
+              <Right>
+                <Var>tempIndex</Var></Right>
+            </BinaryOp></Expression>
+        </If>
+        <Comment text="Modify variable(j) --> add &quot;1&quot;" />
+        <Expression>
+          <BinaryOp name="+=">
+            <Left>
+              <Var>j</Var></Left>
+            <Right>1</Right>
+          </BinaryOp></Expression>
+      </While>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+    </While>
+  </If>
+  <Comment text="For first Page in CurrentPage" />
+  <Expression>
+    <BinaryOp name="=">
+      <Left>
+        <Var>PageObjects_10</Var></Left>
+      <Right>
+        <Call name="QueryObjects">
+          <Arg>Page</Arg>
+          <Arg>
+            <Call name="GetCurrentPage" /></Arg>
+        </Call></Right>
+    </BinaryOp></Expression>
+  <While>
+    <Condition>
+      <BinaryOp name=">">
+        <Left>
+          <Call name="Array_Length">
+            <Arg>
+              <Var>PageObjects_10</Var></Arg>
+          </Call></Left>
+        <Right>0</Right>
+      </BinaryOp></Condition>
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>PageObject_3</Var></Left>
+        <Right>
+          <Call name="Array_PopFront">
+            <Arg>
+              <Var>PageObjects_10</Var></Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Outline at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_OutlineObject_4</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>PageObject_3</Var></Arg>
+            <Arg>Outline</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify variable(i) --> set &quot;0&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>i</Var></Left>
+        <Right>0</Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Paragraph at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_ParagraphObject_5</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_OutlineObject_4</Var></Arg>
+            <Arg>Paragraph</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Insert Text at index -1" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_6</Var></Left>
+        <Right>
+          <Call name="InsertObject">
+            <Arg>
+              <Var>Inserted_ParagraphObject_5</Var></Arg>
+            <Arg>Text</Arg>
+            <Arg>-1</Arg>
+          </Call></Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(value) --> set &quot;References&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_6</Var>
+          <Prop>value</Prop></Left>
+        <Right>References</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(bold) --> set &quot;true&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_6</Var>
+          <Prop>bold</Prop></Left>
+        <Right>true</Right>
+      </BinaryOp></Expression>
+    <Comment text="Modify property(fontSize) --> set &quot;16&quot;" />
+    <Expression>
+      <BinaryOp name="=">
+        <Left>
+          <Var>Inserted_TextObject_6</Var>
+          <Prop>fontSize</Prop></Left>
+        <Right>16</Right>
+      </BinaryOp></Expression>
+    <Comment text="While variable(i) lt variable(N)" />
+    <While>
+      <Condition>
+        <BinaryOp name="&lt;">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>
+            <Var>N</Var></Right>
+        </BinaryOp></Condition>
+      <Comment text="Insert Paragraph at index -1" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_ParagraphObject_7</Var></Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>Inserted_OutlineObject_4</Var></Arg>
+              <Arg>Paragraph</Arg>
+              <Arg>-1</Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Comment text="Insert Text at index -1" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_8</Var></Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>Inserted_ParagraphObject_7</Var></Arg>
+              <Arg>Text</Arg>
+              <Arg>-1</Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify property(value) --> set &quot;   &quot;" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_8</Var>
+            <Prop>value</Prop></Left>
+          <Right>   </Right>
+        </BinaryOp></Expression>
+      <Comment text="Insert Text at index -1" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_9</Var></Left>
+          <Right>
+            <Call name="InsertObject">
+              <Arg>
+                <Var>Inserted_ParagraphObject_7</Var></Arg>
+              <Arg>Text</Arg>
+              <Arg>-1</Arg>
+            </Call></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(ii) --> set variable(RefIndex)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>ii</Var></Left>
+          <Right>
+            <Var>RefIndex</Var>
+            <Index>
+              <Var>i</Var></Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify property(value) --> set variable(LinkedTexts)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_9</Var>
+            <Prop>value</Prop></Left>
+          <Right>
+            <Var>LinkedTexts</Var>
+            <Index>
+              <Var>ii</Var></Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify property(hyperlink) --> set variable(ZoteroLinks)" />
+      <Expression>
+        <BinaryOp name="=">
+          <Left>
+            <Var>Inserted_TextObject_9</Var>
+            <Prop>hyperlink</Prop></Left>
+          <Right>
+            <Var>ZoteroLinks</Var>
+            <Index>
+              <Var>ii</Var></Index></Right>
+        </BinaryOp></Expression>
+      <Comment text="Modify variable(i) --> add &quot;1&quot;" />
+      <Expression>
+        <BinaryOp name="+=">
+          <Left>
+            <Var>i</Var></Left>
+          <Right>1</Right>
+        </BinaryOp></Expression>
+    </While>
+    <Break>1</Break>
+  </While>
 </Macro>
