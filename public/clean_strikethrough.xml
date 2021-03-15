@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-16"?>
+<!-- Published on 2014-12-31 -->
+<Macro id="M20307E93D78C4FE2AE8F60D39DABB1D1" name="Clean Strikethrogh" category="Content" description="Remove strikethrough texts in CurrentPage" version="8">
+  <For each="Text">
+    <That hasProp="strikethrough" op="eq" value="true" />
+    <ModifyProp name="value" op="set" value="" />
+  </For>
+</Macro>

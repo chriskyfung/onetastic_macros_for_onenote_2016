@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-16"?>
-<!-- Published on 2014-11-06 -->
-<Macro id="M8940E16FF6B14449B186A1D0F31308A0" name="Clone Hyperlinks Across Same Texts in Current Page" category="Hyberlink" description="Find each text with hyperlinks, and then clone the hyperlink to the same texts in Current Page" version="8">
+<!-- Published on 2014-12-31 -->
+<Macro id="M8940E16FF6B14449B186A1D0F31308A0" name="Clone Hyperlinks" category="Productivity" description="Clone Hyperlinks Across Same Texts in Current Page. Find each text with hyperlink, and then clone the hyperlink to the same texts in Current Page. Last updated: 2015-01-01 (fixed bugs)" version="8">
   <ModifyVar name="i" op="set" value="0" />
+  <ModifyVar name="minlen" op="set">
+    <Prompt type="text" initialValue="5" values="">Minimum length of text</Prompt>
+  </ModifyVar>
   <For each="Text">
     <That hasProp="hyperlink" op="not" value="" />
-    <ModifyVar name="j" op="set" value="0" />
-    <WhileVar name="j" op="lt" var="i">
-      <IfProp name="hyperlink" op="eq" var="link">
-        <RightIndex var="j" />
-        <ModifyVar name="j" op="add" var="i" />
-        <ModifyVar name="j" op="add" value="2" />
-        <Else>
-          <ModifyVar name="j" op="add" value="1" />
-        </Else>
-      </IfProp>
-    </WhileVar>
-    <IfVar name="j" op="eq" var="i">
-      <ModifyVar name="text" op="set" prop="value">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="link" op="set" prop="hyperlink">
-        <LeftIndex var="i" />
-      </ModifyVar>
-      <ModifyVar name="i" op="add" value="1" />
+    <ModifyVar name="temp_text" op="set" prop="value" />
+    <IfVar name="minlen" op="lte">
+      <Function name="String_Length">
+        <Param name="string" var="temp_text" />
+      </Function>
+      <ModifyVar name="j" op="set" value="0" />
+      <WhileVar name="j" op="lt" var="i">
+        <IfProp name="hyperlink" op="eq" var="link">
+          <RightIndex var="j" />
+          <IfProp name="value" op="eq" var="text">
+            <RightIndex var="j" />
+            <ModifyVar name="j" op="add" var="i" />
+            <ModifyVar name="j" op="add" value="2" />
+            <Else>
+              <ModifyVar name="j" op="add" value="1" />
+            </Else>
+          </IfProp>
+          <Else>
+            <ModifyVar name="j" op="add" value="1" />
+          </Else>
+        </IfProp>
+      </WhileVar>
+      <IfVar name="j" op="eq" var="i">
+        <ModifyVar name="text" op="set" prop="value">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="link" op="set" prop="hyperlink">
+          <LeftIndex var="i" />
+        </ModifyVar>
+        <ModifyVar name="i" op="add" value="1" />
+      </IfVar>
     </IfVar>
   </For>
   <ModifyVar name="N" op="set" var="i" />
@@ -34,6 +49,12 @@
       <IsRootOp />
       <ModifyVar name="nClones" op="set" value="0">
         <LeftIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="msg" op="set" var="text">
+        <RightIndex var="i" />
+      </ModifyVar>
+      <ModifyVar name="msg" op="set">
+        <Prompt type="message" initialValue="" values="" var="msg"></Prompt>
       </ModifyVar>
       <For each="Text">
         <That hasProp="value" op="eq" var="text">
